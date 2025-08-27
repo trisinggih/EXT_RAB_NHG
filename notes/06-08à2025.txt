@@ -1,0 +1,6 @@
+In this project we are going to create a crud application using:
+    * inertia
+    * vue 3
+    * tailwind 4
+    * shadcn/ui for prebuild ui elements components.
+    *lucide-vue-next for the icons.
