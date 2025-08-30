@@ -28,16 +28,31 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const source = computed(() => projects.value);
 
-const handleProjectDeletion = (projectId: number) => {
-  if (confirm('Are you sure you want to delete this project?')) {
-    router.delete(route('projects.destroy', { id: projectId }));
-  }
+
+const handleProjectDeletion = (productId: number) => {
+  if (confirm('Are you sure you want to delete this data?')) {
+        router.delete(route('projects.destroy', { id: productId }), {
+            preserveScroll: true,
+            onSuccess: () => {
+                projects.value = projects.value.filter(pkr => pkr.id !== productId)
+            },
+            onError: (err) => {
+                console.error('Gagal menghapus:', err)
+            }
+        });
+    }
 };
 
 // Debounced search
 const searchInput = ref('');
 const search = ref('');
 let timer: ReturnType<typeof setTimeout>;
+
+const tabs = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'users',    label: 'Users' },
+  { key: 'settings', label: 'Settings' },
+];
 
 watch(
   () => searchInput.value,
@@ -149,7 +164,7 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
         <table class="w-full text-sm">
           <thead class="bg-gray-50 sticky top-0 z-10">
             <tr class="text-gray-700">
-              <th class="px-4 py-3 border-b border-gray-200 text-left">ID</th>
+              <th class="px-4 py-3 border-b border-gray-200 text-left">No</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Name</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Client</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Description</th>
@@ -158,11 +173,11 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
           </thead>
           <tbody>
             <tr
-              v-for="u in pageItems"
+              v-for="(u,i) in pageItems"
               :key="u.id"
               class="odd:bg-white even:bg-gray-50 hover:bg-gray-100 transition-colors"
             >
-              <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ u.id }}</td>
+              <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ startIndex + i + 1 }}</td>
               <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.name }}</td>
               <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.client_name }}</td>
               <td class="px-4 py-3 border-b border-gray-200">{{ u.description ?? '-' }}</td>

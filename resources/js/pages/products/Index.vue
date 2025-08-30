@@ -27,9 +27,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 const source = computed(() => products.value);
 
 const handleProductDeletion = (productId: number) => {
-  if (confirm('Are you sure you want to delete this product?')) {
-    router.delete(route('products.destroy', { id: productId }));
-  }
+  if (confirm('Are you sure you want to delete this data?')) {
+        router.delete(route('products.destroy', { id: productId }), {
+            preserveScroll: true,
+            onSuccess: () => {
+                products.value = products.value.filter(pkr => pkr.id !== productId)
+            },
+            onError: (err) => {
+                console.error('Gagal menghapus:', err)
+            }
+        });
+    }
 };
 
 // Debounced search
@@ -147,7 +155,7 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
         <table class="w-full text-sm">
           <thead class="bg-gray-50 sticky top-0 z-10">
             <tr class="text-gray-700">
-              <th class="px-4 py-3 border-b border-gray-200 text-left">ID</th>
+              <th class="px-4 py-3 border-b border-gray-200 text-left">No</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Name</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Price</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Description</th>

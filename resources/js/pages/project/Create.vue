@@ -39,6 +39,12 @@ const handleInput = () => {
     <Head title="Create a project" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="mb-6">
+            <h1 class="text-lg font-semibold text-white bg-primary px-5 py-3 rounded-se-xl shadow border-b-2 border-secondary">
+                Create Project
+                <p class="text-white mt-1 text-sm font-normal">Kelola daftar project Anda.</p>
+            </h1>
+        </div>
         <div class="p-4">
             <form class="w-8/12 space-y-4" @submit.prevent="handleInput">
                 <div class="space-y-2">
@@ -64,7 +70,7 @@ const handleInput = () => {
                 </div>
 
                 <Button type="submit" :disabled="form.processing">
-                    Add product
+                    Add Project
                 </Button>
             </form>
         </div>

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Banners;
+use App\Models\Services;
+use App\Models\Konten;
+use App\Models\SettingWeb;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,11 +16,17 @@ class FrontHomeController extends Controller
     public function index(): Response
     {
         $banners = Banners::where('deleted_at', null)->get();
+        $services = Services::where('deleted_at', null)->get();
+        $kontens = Konten::get();
+        $settweb = SettingWeb::get();
         return Inertia::render('Welcome', [
-            'banners' => $banners
+            'banners' => $banners,
+            'services' => $services,
+            'kontens' => $kontens,
+            'settingweb' => $settweb
         ]);
-
     }
+
 
 }
 

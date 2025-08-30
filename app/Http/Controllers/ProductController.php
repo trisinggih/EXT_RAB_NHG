@@ -47,7 +47,9 @@ class ProductController extends Controller
     public function material(Product $product): Response
     {
 
-        $material = ProductMaterials::where('product_id', $product->id)->get();
+        $material = ProductMaterials::join('material', 'product_materials.material_id', '=', 'material.id')
+            ->where('product_materials.product_id', $product->id)
+            ->get();
 
         return Inertia::render('products/Material', compact('product', 'material'));
     }
@@ -73,5 +75,13 @@ class ProductController extends Controller
     {
         $product->delete();
         return redirect()->route('products.index')->with('message', 'Product deleted successfully.');
+    }
+
+    public function destroyMaterial($id): RedirectResponse
+    {
+        $material = ProductMaterials::find($id);
+        $material->delete();
+         
+        return redirect()->back()->with('error', 'Product material not found.');
     }
 }

@@ -40,9 +40,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const source = computed(() => material.value);
 
-const handleProductDeletion = (productId: number) => {
+const handleProductMaterialDeletion = (productId: number) => {
   if (confirm('Are you sure you want to delete this product?')) {
-    router.delete(route('products.destroy', { id: productId }));
+    router.delete(route('productmaterial.destroy', { id: productId }));
   }
 };
 
@@ -142,26 +142,13 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
                         >
                         <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ startIndex + i + 1 }}</td>
                         <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.name }}</td>
-                        <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.panjang }} x {{ u.lebar }} x {{ u.tinggi }}</td>
+                        <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.panjang }} p x {{ u.lebar }} l x {{ u.tinggi }} t</td>
                         <td class="px-4 py-3 border-b border-gray-200">{{ u.jumlah }}</td>
                         <td class="px-4 py-3 border-b border-gray-200">{{ u.satuan   ?? '-' }}</td>
                         <td class="px-4 py-3 border-b border-gray-200">
                             <div class="flex gap-1">
-                            <Link :href="route('products.material', { id: u.id })">
-                                <Button class="bg-blue-500 text-white">
-                                    Detail Material
-                                </Button>
-                            </Link>
-                            <Link :href="route('products.edit', { id: u.id })">
-                                <Button class="bg-yellow-500 text-white">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
-                                    <path
-                                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
-                                    />
-                                </svg>
-                                </Button>
-                            </Link>
-                            <Button class="bg-red-600 text-white" @click="handleProductDeletion(u.id)">
+        
+                            <Button class="bg-red-600 text-white" @click="handleProductMaterialDeletion(u.id)">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
                                 <path d="M6 7h12v2H6zm2 3h8v9H8zm3-6h2v2h-2z" />
                                 </svg>

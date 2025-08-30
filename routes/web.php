@@ -31,8 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('products/{product}', [ProductController::class, 'Update'])->name('products.update');
     Route::delete('products/{product}', [ProductController::class, 'Destroy'])->name('products.destroy');
     Route::get('products/{product}/material', [ProductController::class, 'Material'])->name('products.material');
-
-
+    Route::delete('productmaterial/{id}', [ProductController::class, 'DestroyMaterial'])->name('productmaterial.destroy');
 
 
     Route::get('users', [UserController::class, 'Index'])->name('users.index');
@@ -82,7 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('clients/{client}', [ClientController::class, 'Destroy'])->name('clients.destroy');
 
 
-    Route::get('projects', [ProjectController::class, 'Index'])->name('projects.index');
+    
     Route::get('projects/create', [ProjectController::class, 'Create'])->name('projects.create');
     Route::post('projects', [ProjectController::class, 'Store'])->name('projects.store');
     Route::get('projects/{project}/edit', [ProjectController::class, 'Edit'])->name('projects.edit');
@@ -103,11 +102,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('materials/{material}', [MaterialController::class, 'Update'])->name('materials.update');
     Route::delete('materials/{material}', [MaterialController::class, 'Destroy'])->name('materials.destroy');
 
-    Route::get('anggaran', [AnggaranController::class, 'Index'])->name('anggarans.index');
-    
-
+   
 
 });
+    Route::get('anggaran', [AnggaranController::class, 'Index'])->name('anggarans.index');
+
+    Route::get('anggaranfront', [AnggaranController::class, 'IndexFront'])->name('anggarans.front');
+
+    Route::post('anggaranpekerjaan', [AnggaranController::class, 'anggaranpekerjaan'])->name('anggaran.pekerjaan');
+    Route::get('projectpekerjaan/{id}', [AnggaranController::class, 'projectpekerjaan'])->name('anggaran.projectpekerjaan');
+
+    Route::get('projectrabawal/{id}', [AnggaranController::class, 'projectrabawal'])->name('anggaran.projectrabawal');
+    Route::get('projectrabkedua/{id}', [AnggaranController::class, 'projectrabkedua'])->name('anggaran.projectrabkedua');
+    Route::get('anggarandelete/{id}', [AnggaranController::class, 'anggarandelete'])->name('anggaran.delete');
+    Route::get('anggaranpekerjaandelete/{id}', [AnggaranController::class, 'anggaranpekerjaandelete'])->name('anggaran.pekerjaan');
+    Route::post('anggarandetail', [AnggaranController::class, 'anggarandetail'])->name('anggaran.detail');
+
+
+    Route::get('projects', [ProjectController::class, 'Index'])->name('projects.index');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

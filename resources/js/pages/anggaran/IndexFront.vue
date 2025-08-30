@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
+import BlankLayout from '@/layouts/BlankLayout.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import axios from 'axios';
@@ -69,9 +69,7 @@ const selectedProject = computed(() =>
 const selectedTab = ref(0); 
 
 const tabs = [
-  { name: 'RAB Pertama', content: 'Ini adalah konten untuk tab pertama.' },
-  { name: 'RAB Kedua', content: 'Konten untuk tab kedua muncul di sini.' },
-  { name: 'RAB Final', content: 'Konten untuk tab ketiga tampil di sini.' }
+  { name: 'RAB Pertama', content: 'Ini adalah konten untuk tab pertama.' }
 ];
 
 const selectTab = (index: number) => {
@@ -206,7 +204,7 @@ const detailTab = ref<'produk' | 'jasa' | 'manual'>('produk'); // default
 </script>
 
 <template>
-  <AppLayout :breadcrumbs="breadcrumbs">
+  <BlankLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
       <!-- Pilih Project -->
       <div>
@@ -549,5 +547,5 @@ const detailTab = ref<'produk' | 'jasa' | 'manual'>('produk'); // default
 
 
 
-  </AppLayout>
+  </BlankLayout>
 </template>
