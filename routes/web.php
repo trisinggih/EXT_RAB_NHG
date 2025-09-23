@@ -12,10 +12,17 @@ use App\Http\Controllers\FrontHomeController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\AnggaranController;
+use App\Http\Controllers\ImageController;
+use App\Http\Controllers\AnnotationController;
+use App\Http\Controllers\BomController;
+use App\Http\Controllers\ProductPekerjaanController;
+use App\Http\Controllers\ProjectProductController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', [FrontHomeController::class, 'Index'])->name('home');
+Route::get('/blog', [FrontHomeController::class, 'Blog'])->name('blog');
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
@@ -24,15 +31,26 @@ Route::get('dashboard', function () {
 // this will create a group route. Those authorize to access them are authenticated and verified
 // users.
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('products', [ProductController::class, 'Index'])->name('products.index');
-    Route::get('products/create', [ProductController::class, 'Create'])->name('products.create');
-    Route::post('products', [ProductController::class, 'Store'])->name('products.store');
-    Route::get('products/{product}/edit', [ProductController::class, 'Edit'])->name('products.edit');
-    Route::put('products/{product}', [ProductController::class, 'Update'])->name('products.update');
-    Route::delete('products/{product}', [ProductController::class, 'Destroy'])->name('products.destroy');
-    Route::get('products/{product}/material', [ProductController::class, 'Material'])->name('products.material');
-    Route::delete('productmaterial/{id}', [ProductController::class, 'DestroyMaterial'])->name('productmaterial.destroy');
+    Route::get('bom', [ProductController::class, 'Index'])->name('products.index');
+    Route::get('bom/create', [ProductController::class, 'Create'])->name('products.create');
+    Route::post('bom', [ProductController::class, 'Store'])->name('products.store');
+    Route::get('bom/{product}/edit', [ProductController::class, 'Edit'])->name('products.edit');
+    Route::put('bom/{product}', [ProductController::class, 'Update'])->name('products.update');
+    Route::delete('bom/{product}', [ProductController::class, 'Destroy'])->name('products.destroy');
+    Route::get('bom/{product}/material', [ProductController::class, 'Material'])->name('products.material');
+    Route::delete('bommaterial/{id}', [ProductController::class, 'DestroyMaterial'])->name('productmaterial.destroy');
+    Route::get('bom/{product}/services', [ProductController::class, 'Services'])->name('products.services');
 
+    Route::post('bommaterial/create',[BomController::class, 'store'])->name('bommaterial.store');
+    Route::post('bommaterialdelete',[BomController::class, 'Destroy'])->name('bommaterial.destroy');
+
+    Route::post('productpekerjaan/create',[ProductPekerjaanController::class, 'store'])->name('productpekerjaan.store');
+    Route::delete('productpekerjaan/{id}', [ProductPekerjaanController::class, 'destroy'])->name('productpekerjaan.destroy');
+    Route::post('productpekerjaandetail/create',[ProductPekerjaanController::class, 'storeDetail'])->name('productpekerjaan.storedetail');
+    Route::delete('productpekerjaandetail/{id}', [ProductPekerjaanController::class, 'destroyDetail'])->name('productpekerjaan.destroydetail');
+    Route::get('productpekerjaan/{id}', [ProductPekerjaanController::class, 'ambil'])->name('productpekerjaan.ambil');
+
+    Route::get('projectproduct/{id}', [ProjectProductController::class, 'ambil'])->name('projectproduct.ambil');
 
     Route::get('users', [UserController::class, 'Index'])->name('users.index');
     Route::get('users/create', [UserController::class, 'Create'])->name('users.create');
@@ -91,9 +109,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('suppliers', [SupplierController::class, 'Index'])->name('suppliers.index');
     Route::get('suppliers/create', [SupplierController::class, 'Create'])->name('suppliers.create');
     Route::post('suppliers', [SupplierController::class, 'Store'])->name('suppliers.store');
+    Route::post('suppliermaterials', [SupplierController::class, 'StoreMaterials'])->name('suppliers.materials.store');
     Route::get('suppliers/{supplier}/edit', [SupplierController::class, 'Edit'])->name('suppliers.edit');
     Route::put('suppliers/{supplier}', [SupplierController::class, 'Update'])->name('suppliers.update');
     Route::delete('suppliers/{supplier}', [SupplierController::class, 'Destroy'])->name('suppliers.destroy');
+    Route::get('suppliers/{supplier}/material', [SupplierController::class, 'material'])->name('suppliers.material');
+    Route::delete('suppliermaterials/{supplier}', [SupplierController::class, 'DestroyMaterial'])->name('suppliers.materials.destroy');
 
     Route::get('materials', [MaterialController::class, 'Index'])->name('materials.index');
     Route::get('materials/create', [MaterialController::class, 'Create'])->name('materials.create');
@@ -114,12 +135,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('projectrabawal/{id}', [AnggaranController::class, 'projectrabawal'])->name('anggaran.projectrabawal');
     Route::get('projectrabkedua/{id}', [AnggaranController::class, 'projectrabkedua'])->name('anggaran.projectrabkedua');
-    Route::get('anggarandelete/{id}', [AnggaranController::class, 'anggarandelete'])->name('anggaran.delete');
-    Route::get('anggaranpekerjaandelete/{id}', [AnggaranController::class, 'anggaranpekerjaandelete'])->name('anggaran.pekerjaan');
+    Route::get('anggarandelete/{tambahan}/{id}', [AnggaranController::class, 'anggarandelete'])->name('anggaran.delete');
+    Route::get('anggaranpekerjaandelete/{id}', [AnggaranController::class, 'anggaranpekerjaandelete'])->name('anggaran.pekerjaandelete');
     Route::post('anggarandetail', [AnggaranController::class, 'anggarandetail'])->name('anggaran.detail');
 
 
     Route::get('projects', [ProjectController::class, 'Index'])->name('projects.index');
+
+    Route::post('/upload-image', [ImageController::class, 'store'])->name('upload.image');
+    Route::post('/annotations', [AnnotationController::class, 'store']);
+
+    Route::get('/projects/{id}/export-rab', [AnggaranController::class, 'exportRAB']);
+    Route::get('/hasildashboard', [DashboardController::class, 'index']);
+    Route::get('/hasildashboardchart', [DashboardController::class, 'grafik']);
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

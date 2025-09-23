@@ -17,11 +17,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 const form = useForm({
   name: '',
   satuan: '',
-  jumlah: 0,
-  panjang: 0,
-  lebar: 0,
-  tinggi: 0,
-  estimasi_price: 0,
 });
 
 const handleSubmit = () => {
@@ -66,62 +61,7 @@ const handleSubmit = () => {
           <div class="text-sm text-red-600" v-if="form.errors.satuan">{{ form.errors.satuan }}</div>
         </div>
 
-        <div class="space-y-2">
-          <Label for="name">Jumlah</Label>
-          <Input
-            v-model="form.jumlah"
-            id="jumlah"
-            type="number"
-            placeholder=""
-          />
-          <div class="text-sm text-red-600" v-if="form.errors.jumlah">{{ form.errors.jumlah }}</div>
-        </div>
-
-        <div class="space-y-2">
-          <Label for="name">Panjang</Label>
-          <Input
-            v-model="form.panjang"
-            id="panjang"
-            type="number"
-            placeholder=""
-          />
-          <div class="text-sm text-red-600" v-if="form.errors.panjang">{{ form.errors.panjang }}</div>
-        </div>
-
-        <div class="space-y-2">
-          <Label for="name">Lebar</Label>
-          <Input
-            v-model="form.lebar"
-            id="lebar"
-            type="number"
-            placeholder=""
-          />
-          <div class="text-sm text-red-600" v-if="form.errors.lebar">{{ form.errors.lebar }}</div>
-        </div>
-
-        <div class="space-y-2">
-          <Label for="name">Tinggi</Label>
-          <Input
-            v-model="form.tinggi"
-            id="tinggi"
-            type="number"
-            placeholder=""
-          />
-          <div class="text-sm text-red-600" v-if="form.errors.tinggi">{{ form.errors.tinggi }}</div>
-        </div>
-
-        <div class="space-y-2">
-          <Label for="name">Estimasi Price</Label>
-          <Input
-            v-model="form.estimasi_price"
-            id="estimasi_price"
-            type="number"
-            placeholder=""
-          />
-          <div class="text-sm text-red-600" v-if="form.errors.estimasi_price">{{ form.errors.estimasi_price }}</div>
-        </div>
-
-
+      
 
         <!-- Submit -->
         <Button type="submit" :disabled="form.processing">

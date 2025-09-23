@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Suppliers;
+use App\Models\SupplierMaterials;
+use App\Models\Materials;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -36,16 +38,37 @@ class SupplierController extends Controller
         return redirect()->route('suppliers.index')->with('message', 'Suppliers created successfully.');
     }
 
+    public function storeMaterials(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'supplier_id' => 'required|int',
+            'material_id' => 'required|int',
+            'price' => 'required|numeric',
+        ]);
+        $cekdata = SupplierMaterials::where('supplier_id', $data['supplier_id'])->where('material_id', $data['material_id'])->get();
+        if($cekdata) {
+            SupplierMaterials::where('supplier_id', $data['supplier_id'])->where('material_id', $data['material_id'])->update($data);
+        } else {
+            SupplierMaterials::create($data);
+        }
+        return redirect()->route('suppliers.material', $data['supplier_id'])->with('message', 'Supplier updated successfully.');
+    }
+
     public function edit(Suppliers $supplier): Response
     {
 
         return Inertia::render('supplier/Edit', compact('supplier'));
     }
 
-    public function maetrial(Suppliers $supplier): Response
+    public function material(Suppliers $supplier): Response
     {
+        $materials = SupplierMaterials::join('material', 'supplier_material.material_id', '=', 'material.id')
+            ->select('supplier_material.*', 'material.name as material_name', 'material.satuan as material_satuan')
+            ->where('supplier_material.supplier_id', $supplier->id)
+            ->get();
 
-        return Inertia::render('supplier/Material', compact('supplier'));
+        $ms_material = Materials::where('deleted_at', null)->get();
+        return Inertia::render('supplier/Material', compact('supplier', 'materials', 'ms_material'));
     }
 
     public function update(Request $request, Suppliers $supplier): RedirectResponse
@@ -65,6 +88,16 @@ class SupplierController extends Controller
         $supplier->delete();
         return redirect()->route('suppliers.index')->with('message', 'Supplier deleted successfully.');
     }
+
+    public function destroyMaterial($id): RedirectResponse
+    {
+        $data = SupplierMaterials::where('id',$id)->first();
+        $material = SupplierMaterials::where('id',$id)->delete();
+         
+        return redirect()->route('suppliers.material', $data['supplier_id'])->with('message', 'Supplier updated successfully.');
+
+    }
+
 }
 
   

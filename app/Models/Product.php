@@ -13,4 +13,9 @@ class Product extends Model
         'price',
         'description'
     ];
+
+    public function image()
+    {
+        return $this->hasOne(Image::class);
+    }
 }

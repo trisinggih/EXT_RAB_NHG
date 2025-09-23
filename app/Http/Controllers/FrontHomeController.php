@@ -6,6 +6,7 @@ use App\Models\Banners;
 use App\Models\Services;
 use App\Models\Konten;
 use App\Models\SettingWeb;
+use App\Models\Blogs;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -23,6 +24,16 @@ class FrontHomeController extends Controller
             'banners' => $banners,
             'services' => $services,
             'kontens' => $kontens,
+            'settingweb' => $settweb
+        ]);
+    }
+
+    public function blog(): Response
+    {
+        $blogs = Blogs::orderBy('date_blog', 'desc')->get();
+        $settweb = SettingWeb::get();
+        return Inertia::render('Blog', [
+            'blogs' => $blogs,
             'settingweb' => $settweb
         ]);
     }

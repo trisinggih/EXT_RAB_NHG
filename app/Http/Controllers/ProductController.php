@@ -3,7 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Image;
 use App\Models\ProductMaterials;
+use App\Models\Annotation;
+use App\Models\Materials;
+use App\Models\ProductPekerjaan;
+use App\Models\ProductDetail;
+use App\Models\Pekerjaan;
+use App\Models\Bom;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -50,8 +57,26 @@ class ProductController extends Controller
         $material = ProductMaterials::join('material', 'product_materials.material_id', '=', 'material.id')
             ->where('product_materials.product_id', $product->id)
             ->get();
+        $image = Image::where('product_id', $product->id)->first();
+        if(!$image){
+            $annotations = [];
+        }else{
+            $annotations = Annotation::where('image_id', $image->id)->get();
+        }
+        
+        $ms_material = Materials::where('deleted_at', null)->get();
+        $bom = Bom::where('product_id', $product->id)->get();
+        return Inertia::render('products/Material', compact('product', 'material', 'image', 'annotations', 'ms_material', 'bom'));
+    }
 
-        return Inertia::render('products/Material', compact('product', 'material'));
+    public function services(Product $product): Response
+    {
+        $pekerjaan = Pekerjaan::get();
+        $productpekerjaan = ProductPekerjaan::join('pekerjaan', 'product_pekerjaan.pekerjaan_id', '=', 'pekerjaan.id')
+            ->select('product_pekerjaan.*', 'pekerjaan.name as pekerjaan_name')
+            ->where('product_id', $product->id)->get();
+        $productdetail = ProductDetail::where('product_id', $product->id)->get();
+        return Inertia::render('products/Services', compact('product', 'pekerjaan', 'productpekerjaan', 'productdetail'));
     }
 
     public function update(Request $request, Product $product): RedirectResponse

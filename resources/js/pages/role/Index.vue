@@ -124,9 +124,7 @@ const handleRolesDeletion = (roleID: number) => {
             <option :value="100">100</option>
             </select>
 
-            <Link :href="route('roles.create')">
-              <button class=" btn bg-primary p-2 text-white rounded ml-2">Tambah Role</button>
-            </Link>
+
         </div>
 
         <div class="relative">
@@ -168,7 +166,7 @@ const handleRolesDeletion = (roleID: number) => {
                 <th class="px-4 py-3 border-b border-gray-200 text-left">No</th>
                 <th class="px-4 py-3 border-b border-gray-200 text-left">Role</th>
                 <th class="px-4 py-3 border-b border-gray-200 text-left">Deskripsi</th>
-                <th class="px-4 py-3 border-b border-gray-200 text-left w-[100px]" >Action</th>
+                <!-- <th class="px-4 py-3 border-b border-gray-200 text-left w-[100px]" >Action</th> -->
             </tr>
             </thead>
             <tbody>
@@ -180,7 +178,7 @@ const handleRolesDeletion = (roleID: number) => {
                 <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ startIndex + i + 1 }}</td>
                 <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap font-medium text-gray-800">{{ u.role }}</td>
                 <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ u.description ?? '-' }}</td>
-                <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">
+                <!-- <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">
                 <div class="flex gap-1">
                     <Link :href="route('roles.edit', {id: u.id})">
                       <Button class="bg-yellow-500 text-white">
@@ -192,7 +190,7 @@ const handleRolesDeletion = (roleID: number) => {
                     
                     </Button>
                 </div>
-                </td>
+                </td> -->
             </tr>
             <tr v-if="pageItems.length === 0">
                 <td colspan="6" class="px-4 py-10 text-center text-gray-400">Tidak ada data yang cocok.</td>

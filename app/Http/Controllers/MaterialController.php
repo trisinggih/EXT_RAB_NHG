@@ -30,11 +30,6 @@ class MaterialController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'satuan' => 'required|string|max:255',
-            'jumlah' => 'required|numeric',
-            'panjang' => 'required|numeric',
-            'lebar' => 'required|numeric',
-            'tinggi' => 'required|numeric',
-            'estimasi_price' => 'required|numeric'
         ]);
         Materials::create($data);
         return redirect()->route('materials.index')->with('message', 'Material created successfully.');
@@ -50,11 +45,6 @@ class MaterialController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'satuan' => 'required|string|max:255',
-            'jumlah' => 'required|numeric',
-            'panjang' => 'required|numeric',
-            'lebar' => 'required|numeric',
-            'tinggi' => 'required|numeric',
-            'estimasi_price' => 'required|numeric'
         ]);
         $material->update($data);
         return redirect()->route('materials.index')->with('message', 'Material updated successfully.');
@@ -65,6 +55,8 @@ class MaterialController extends Controller
         $material->delete();
         return redirect()->route('materials.index')->with('message', 'Material deleted successfully.');
     }
+
+    
 }
 
   

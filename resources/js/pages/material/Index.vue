@@ -158,11 +158,6 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
                 <th class="px-4 py-3 border-b border-gray-200 text-left">No</th>
                 <th class="px-4 py-3 border-b border-gray-200 text-left">Name</th>
                 <th class="px-4 py-3 border-b border-gray-200 text-left">Satuan</th>
-                <th class="px-4 py-3 border-b border-gray-200 text-left">Jumlah</th>
-                <th class="px-4 py-3 border-b border-gray-200 text-left">Panjang</th>
-                <th class="px-4 py-3 border-b border-gray-200 text-left">Lebar</th>
-                <th class="px-4 py-3 border-b border-gray-200 text-left">Tinggi</th>
-                <th class="px-4 py-3 border-b border-gray-200 text-left">Estimasi</th>
                 <th class="px-4 py-3 border-b border-gray-200 text-left w-[100px]">Action</th>
             </tr>
             </thead>
@@ -172,14 +167,10 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
                 :key="u.id"
                 class="odd:bg-white even:bg-gray-50 hover:bg-gray-100 transition-colors"
             >
-                <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ startIndex + i + 1 }}</td>
+                <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap w-[50px] text-center">{{ startIndex + i + 1 }}</td>
                 <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap font-medium text-gray-800">{{ u.name }}</td>
                 <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ u.satuan ?? '-' }}</td>
-                <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ u.jumlah ?? '-' }}</td>
-                <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ u.panjang ?? '-' }}</td>
-                <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ u.lebar ?? '-' }}</td>
-                <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ u.tinggi ?? '-' }}</td>
-                <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ u.estimasi_price ?? '-' }}</td>
+            
                 <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">
                     <div class="flex gap-1">
                         <Link :href="route('materials.edit', {id: u.id})">

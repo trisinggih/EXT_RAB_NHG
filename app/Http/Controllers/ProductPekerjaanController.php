@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\ProductPekerjaan;
+use App\Models\ProductDetail;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class ProductPekerjaanController extends Controller
+{
+
+
+    public function store(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'product_id' => 'required',
+            'pekerjaan_id' => 'required',
+        ]);
+      
+        ProductPekerjaan::create($data);
+
+         
+        return redirect()->route('products.services', $data['product_id'])->with('message', 'Service created successfully.');
+    }
+
+    public function ambil($ids): \Illuminate\Http\JsonResponse
+    {
+
+       $idArray = explode(',', $ids);
+
+        $pekerjaan = ProductPekerjaan::join('pekerjaan', 'product_pekerjaan.pekerjaan_id', '=', 'pekerjaan.id')
+            ->select('product_pekerjaan.pekerjaan_id', 'pekerjaan.name as pekerjaan_name')
+            ->whereIn('product_pekerjaan.product_id', $idArray) 
+            ->distinct()
+            ->get();
+
+        return response()->json($pekerjaan);
+
+    }
+
+
+    public function storeDetail(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'product_id' => 'required',
+            'pekerjaan_id' => 'required',
+            'tambahan' => 'required',
+            'jumlah' => 'required',
+            'estimasi_price' => 'required',
+            'satuan' => 'required',
+        ]);
+ 
+        ProductDetail::create($data);
+            
+        return redirect()->route('products.services', $data['product_id'])->with('message', 'Service updated successfully.');
+    }
+
+
+
+    public function destroy($id): RedirectResponse
+    {
+        $pekerjaan = ProductPekerjaan::find($id);
+        ProductDetail::where('pekerjaan_id', $pekerjaan->pekerjaan_id)->where('product_id', $pekerjaan->product_id)->delete();
+        $pekerjaan->delete();
+        return redirect()->route('products.services', $pekerjaan->product_id)->with('message', 'Bom deleted successfully.');
+    }
+
+    public function destroyDetail($id): RedirectResponse
+    {
+        $material = ProductDetail::find($id);
+        $material->delete();
+        return redirect()->route('products.services', $material->product_id)->with('message', 'Bom deleted successfully.');
+    }
+    
+}
+
+  

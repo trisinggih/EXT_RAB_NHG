@@ -5,13 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Materials extends Model
+class ProjectProduct extends Model
 {
     use HasFactory;
-    protected $table = 'material';
+    protected $table = 'project_product';
     protected $primaryKey = 'id';
+    public $timestamps = false;
     protected $fillable = [
-        'name',
-        'satuan',
+        'project_id',
+        'pekerjaan_id',
     ];
+
+    
 }

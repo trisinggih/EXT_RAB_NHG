@@ -30,6 +30,10 @@ const mainNavItems: NavItem[] = [
                 title: 'Clients',
                 href: '/clients',
             },
+            {
+                title: 'Material',
+                href: '/materials',
+            },
              {
                 title: 'Suppliers',
                 href: '/suppliers',
@@ -61,13 +65,9 @@ const mainNavItems: NavItem[] = [
                 href: '/pekerjaan',
             },
             {
-                title: 'Produk',
-                href: '/products',
+                title: 'Production',
+                href: '/bom',
             },
-            {
-                title: 'Material',
-                href: '/materials',
-            }
         ],  
     },
     {

@@ -5,15 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SupplierMaterials extends Model
+class ProjectDetailTambahan extends Model
 {
     use HasFactory;
-    protected $table = 'supplier_material';
+    protected $table = 'project_detail_tambahan';
     protected $primaryKey = 'id';
     public $timestamps = false;
     protected $fillable = [
-        'supplier_id',
-        'material_id',
-        'price'
+        'project_id',
+        'pekerjaan_id',
+        'tambahan',
+        'jumlah',
+        'estimasi_price',
+        'rab',
+        'satuan',
     ];
 }

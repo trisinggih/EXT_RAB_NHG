@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Pekerjaan;
 use App\Models\ProjectPekerjaan;
+use App\Models\ProjectProduct;
+use App\Models\ProjectDetailTambahan;
 use App\Models\ProjectDetail;
 use App\Models\Product;
 use App\Models\ProductMaterials;
@@ -13,6 +15,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\DB;
+
+use App\Exports\RABExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AnggaranController extends Controller
 {
@@ -52,68 +58,85 @@ class AnggaranController extends Controller
             'project_id' => 'required',
             'pekerjaan_id' => 'required',
         ]);
-        ProjectPekerjaan::create([
-            'project_id' => $validated['project_id'],
-            'pekerjaan_id' => $validated['pekerjaan_id'],
-        ]);
+        $cekdata = ProjectPekerjaan::where('project_id', $validated['project_id'])->where('pekerjaan_id', $validated['pekerjaan_id'])->first();
+        if (!$cekdata) {
+            ProjectPekerjaan::create([
+                'project_id' => $validated['project_id'],
+                'pekerjaan_id' => $validated['pekerjaan_id'],
+            ]);
+        }
+        
         return redirect()->route('anggarans.index')->with('success', 'Anggaran pekerjaan berhasil ditambahkan.');
     }
 
     public function projectpekerjaan($id): \Illuminate\Http\JsonResponse
     {
-        $data = ProjectPekerjaan::with('details')
-            ->join('pekerjaan', 'project_pekerjaan.pekerjaan_id', '=', 'pekerjaan.id')
-            ->select('project_pekerjaan.*', 'pekerjaan.name as pekerjaan_name')
-            ->where('project_pekerjaan.project_id', $id)
-            ->get();
-        return response()->json($data);
+        $query = DB::select("
+SELECT DISTINCT 
+    a.project_id, 
+    a.pekerjaan_id, 
+    b.name AS pekerjaan_name,
+    (
+        SELECT JSON_ARRAYAGG(
+                   JSON_OBJECT(
+                       'pekerjaan_id', t.pekerjaan_id,
+                       'tambahan', t.tambahan,
+                       'total_jumlah', t.total_jumlah,
+                       'total_estimasi_price', t.total_estimasi_price,
+                       'satuan', t.satuan
+                   )
+               )
+        FROM (
+            SELECT 
+                x.pekerjaan_id,
+                d.tambahan,
+                SUM(d.jumlah) AS total_jumlah,
+                SUM(d.estimasi_price) AS total_estimasi_price,
+                MAX(d.satuan) AS satuan
+            FROM project_detail d
+            JOIN product_pekerjaan x ON d.pekerjaan_id = x.id
+            JOIN pekerjaan w ON x.pekerjaan_id = w.id
+            WHERE d.project_id = a.project_id
+            GROUP BY x.pekerjaan_id, d.tambahan
+
+            UNION ALL
+
+            SELECT 
+                d.pekerjaan_id,
+                d.tambahan,
+                SUM(d.jumlah) AS total_jumlah,
+                SUM(d.estimasi_price) AS total_estimasi_price,
+                MAX(d.satuan) AS satuan
+            FROM project_detail_tambahan d
+            JOIN pekerjaan w ON d.pekerjaan_id = w.id
+            WHERE d.project_id = a.project_id
+            GROUP BY d.pekerjaan_id, d.tambahan
+        ) t
+        WHERE t.pekerjaan_id = a.pekerjaan_id
+    ) AS detail
+FROM project_pekerjaan AS a 
+JOIN pekerjaan AS b ON a.pekerjaan_id = b.id
+            WHERE a.project_id = ?
+        ", [$id]); 
+
+        return response()->json($query);
     }
+
 
     public function anggarandetail(Request $request): RedirectResponse
     {
   
-        if ($request->type == 'produk') {
-            $product = Product::find($request->product_id);
-            $material = ProductMaterials::select('material.*', 'product_materials.jumlah', 'product_materials.estimasi_price')->join('material', 'product_materials.material_id', '=', 'material.id')
-                -> where('product_materials.product_id', $request->product_id)->get();
-            foreach ($material as $mat) {
-                ProjectDetail::create([
-                    'project_id' => $request->project_id,
-                    'pekerjaan_id' => $request->pekerjaan_id,
-                    'material_id' => $mat->id,
-                    'tambahan' => $mat->name,
-                    'satuan' => $mat->satuan,
-                    'jumlah' => $mat->jumlah * ($request->qty ?? 1),
-                    'estimasi_price' => $mat->estimasi_price,
-                    'rab' => $request->rab,
-                ]);
-            }
-        } else if ($request->type == 'jasa') {
-            $jasa = Jasa::find($request->jasa_id);
-            if ($jasa) {
-                ProjectDetail::create([
-                    'project_id' => $request->project_id,
-                    'pekerjaan_id' => $request->pekerjaan_id,
-                    'jasa_id' => $jasa->id,
-                    'tambahan' => $jasa->name,
-                    'satuan' => 'unit',
-                    'jumlah' => $request->qty ?? 1,
-                    'rab' => $request->rab,
-                    'estimasi_price' => $jasa->estimasi_price,
-                ]);
-            }
-        } elseif ($request->type === 'manual') {
-            ProjectDetail::create([
-                'project_id' => $request->project_id,
-                'pekerjaan_id' => $request->pekerjaan_id,
-                'tambahan' => $request->tambahan ?? '',
-                'satuan' => $request->satuan ?? '',
-                'jumlah' => $request->qty ?? 0,
-                'estimasi_price' => $request->harga ?? 0,
-                'rab' => $request->rab,
-            ]);
-        }
-  
+        ProjectDetailTambahan::create([
+            'project_id' => $request->project_id,
+            'pekerjaan_id' => $request->pekerjaan_id,
+            'tambahan' => $request->tambahan,
+            'satuan' => $request->satuan,
+            'jumlah' => $request->qty,
+            'estimasi_price' => $request->harga,
+            'rab' => $request->rab,
+        ]);
+          
+        
         return redirect()->route('anggarans.index')->with('success', 'Detail anggaran berhasil ditambahkan.');
 
     }
@@ -141,12 +164,14 @@ class AnggaranController extends Controller
 
 
 
-    public function anggarandelete($id): RedirectResponse
+    public function anggarandelete($tambahan, $id): RedirectResponse
     {
-        $detail = ProjectDetail::find($id);
-        if ($detail) {
-            $detail->delete();
-        }
+        // $detail = ProjectDetail::find($id);
+        // if ($detail) {
+        //     $detail->delete();
+        // }
+        ProjectDetail::where('tambahan', $tambahan)->where('project_id', $id)->delete();
+        ProjectDetailTambahan::where('tambahan', $tambahan)->where('project_id', $id)->delete();
         return redirect()->route('anggarans.index')->with('success', 'Detail anggaran berhasil dihapus.');
     }
 
@@ -157,6 +182,12 @@ class AnggaranController extends Controller
             $detail->delete();
         }
         return redirect()->route('anggarans.index')->with('success', 'Detail anggaran berhasil dihapus.');
+    }
+
+
+    public function exportRAB($id)
+    {
+        return Excel::download(new RABExport($id), 'RAB_Project_'.$id.'.xlsx');
     }
 
 }

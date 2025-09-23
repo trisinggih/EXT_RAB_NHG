@@ -95,8 +95,8 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="mb-6">
       <h1 class="text-lg font-semibold text-white bg-primary px-5 py-3 rounded-se-xl shadow border-b-2 border-secondary">
-        Product List
-        <p class="text-white mt-1 text-sm font-normal">Kelola daftar product Anda.</p>
+         Bill of Material 
+        <p class="text-white mt-1 text-sm font-normal">Kelola bill of material anda</p>
       </h1>
     </div>
 
@@ -155,7 +155,7 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
         <table class="w-full text-sm">
           <thead class="bg-gray-50 sticky top-0 z-10">
             <tr class="text-gray-700">
-              <th class="px-4 py-3 border-b border-gray-200 text-left">No</th>
+              <th class="px-4 py-3 border-b border-gray-200 text-left w-[50px]">No</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Name</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Price</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Description</th>
@@ -177,6 +177,11 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
                  <Link :href="route('products.material', { id: u.id })">
                     <Button class="bg-blue-500 text-white">
                         Detail Material
+                    </Button>
+                  </Link>
+                  <Link :href="route('products.services', { id: u.id })">
+                    <Button class="bg-gray-900 text-white">
+                        Detail Services
                     </Button>
                   </Link>
                   <Link :href="route('products.edit', { id: u.id })">
