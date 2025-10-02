@@ -12,6 +12,8 @@ interface Projects {
     name: string;
     client_id: number;
     description?: string;
+    start_date: string;
+    end_date: string;
 }
 
 const props = defineProps<{
@@ -26,6 +28,8 @@ const form = useForm({
     name: props.projects.name,
     client_id: props.projects.client_id,
     description: props.projects.description,
+    start_date: props.projects.start_date,
+    end_date: props.projects.end_date,
 });
 
 // this function is going to handle the user information submit.
@@ -61,6 +65,14 @@ const handleInput = () => {
                       </option>
                     </select>
                     <div class="text-sm text-red-600" v-if="form.errors.client_id">{{ form.errors.client_id }}</div>
+                </div>
+                <div class="space-y-2">
+                    <Label for="price">Start Date</Label>
+                    <Input v-model="form.start_date" id="start_date" type="date" placeholder="" />
+                </div>
+                <div class="space-y-2">
+                    <Label for="price">End Date</Label>
+                    <Input v-model="form.end_date" id="end_date" type="date" placeholder="" />
                 </div>
                 <div class="space-y-2">
                     <Label for="description">Description</Label>

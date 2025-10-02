@@ -28,6 +28,8 @@ const form = useForm({
     price: 0,
     description: '',
     client_id: '',
+    start_date: '',
+    end_date: '',
 });
 const handleInput = () => {
     form.post(route('projects.store'));
@@ -63,6 +65,15 @@ const handleInput = () => {
                     </select>
                     <div class="text-sm text-red-600" v-if="form.errors.client_id">{{ form.errors.client_id }}</div>
                 </div>
+                <div class="space-y-2">
+                    <Label for="price">Start Date</Label>
+                    <Input v-model="form.start_date" id="start_date" type="date" placeholder="Enter the price for the product..."></Input>
+                </div>
+                <div class="space-y-2">
+                    <Label for="price">End Date</Label>
+                    <Input v-model="form.end_date" id="end_date" type="date" placeholder="Enter the price for the product..."></Input>
+                </div>
+
                 <div class="space-y-2">
                     <Label for="description">Description</Label>
                     <Textarea v-model="form.description" id="description" type="text" placeholder="Enter the description for the product..."/>

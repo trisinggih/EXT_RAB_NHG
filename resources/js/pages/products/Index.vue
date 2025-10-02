@@ -157,7 +157,7 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
             <tr class="text-gray-700">
               <th class="px-4 py-3 border-b border-gray-200 text-left w-[50px]">No</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Name</th>
-              <th class="px-4 py-3 border-b border-gray-200 text-left">Price</th>
+              <!-- <th class="px-4 py-3 border-b border-gray-200 text-left">Price</th> -->
               <th class="px-4 py-3 border-b border-gray-200 text-left">Description</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left w-[100px]">Action</th>
             </tr>
@@ -170,7 +170,7 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
             >
               <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ startIndex + i + 1 }}</td>
               <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.name }}</td>
-              <td class="px-4 py-3 border-b border-gray-200">{{ u.price != null ? u.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })  : '-' }}</td>
+              <!-- <td class="px-4 py-3 border-b border-gray-200">{{ u.price != null ? u.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })  : '-' }}</td> -->
               <td class="px-4 py-3 border-b border-gray-200">{{ u.description ?? '-' }}</td>
               <td class="px-4 py-3 border-b border-gray-200">
                 <div class="flex gap-1">

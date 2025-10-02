@@ -14,6 +14,7 @@ class SupplierMaterials extends Model
     protected $fillable = [
         'supplier_id',
         'material_id',
-        'price'
+        'price',
+        'link'
     ];
 }

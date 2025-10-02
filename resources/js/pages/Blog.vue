@@ -47,18 +47,25 @@ const settingweb = computed(() => props.settingweb)
           
       
         <nav class="flex space-x-6 text-white">
-          <a href="#home" class="hover:underline">Home</a>
-          <a href="#layanan" class="hover:underline">Layanan Kami</a>
+          <a href="/#home" class="hover:underline">Home</a>
+          <a href="/#layanan" class="hover:underline">Layanan Kami</a>
           <a href="/blog" class="hover:underline">Blog</a>
-          <a href="#kontak" class="hover:underline">Hubungi Kami</a>
+          <a href="/#kontak" class="hover:underline">Hubungi Kami</a>
         </nav>
       </div>
     </header>   
 
     <!-- Product Section -->
-    <section class="px-6 py-12 grid md:grid-cols-4 gap-8 container mx-auto mt-20">
-      <div v-for="(blog, index) in blogs" :key="index">
-        <img :src="`/images/${blog.image_blog}`" alt="Product" class="w-full" />
+    <section class="px-6 py-12 grid md:grid-cols-4 gap-8 container mx-auto mt-20 ">
+      <div v-for="(blog, index) in blogs" :key="index" class="bg-warning border-1 shadow rounded overflow-hidden ">
+        <div
+            class="bg-white shadow rounded overflow-hidden h-[200px] bg-cover bg-center"
+            :style="{
+              backgroundImage: `url('/images/${blog.image_blog}')`
+            }"
+          >
+          </div>
+        <!-- <img :src="`/images/${blog.image_blog}`" alt="Product" class="w-full" /> -->
         <div class="p-6">
           <h4 class="font-bold text-lg mb-2">{{ blog.title_blog }}</h4>
           <p class="text-gray-600 mb-4">

@@ -79,7 +79,10 @@ SELECT DISTINCT
     (
         SELECT JSON_ARRAYAGG(
                    JSON_OBJECT(
+                        'id', t.id,
+                        'type', t.type,
                        'pekerjaan_id', t.pekerjaan_id,
+                       'material_id', t.material_id,
                        'tambahan', t.tambahan,
                        'total_jumlah', t.total_jumlah,
                        'total_estimasi_price', t.total_estimasi_price,
@@ -88,8 +91,11 @@ SELECT DISTINCT
                )
         FROM (
             SELECT 
+                d.id,
+                'bom' as type,
                 x.pekerjaan_id,
                 d.tambahan,
+                d.material_id,
                 SUM(d.jumlah) AS total_jumlah,
                 SUM(d.estimasi_price) AS total_estimasi_price,
                 MAX(d.satuan) AS satuan
@@ -97,20 +103,23 @@ SELECT DISTINCT
             JOIN product_pekerjaan x ON d.pekerjaan_id = x.id
             JOIN pekerjaan w ON x.pekerjaan_id = w.id
             WHERE d.project_id = a.project_id
-            GROUP BY x.pekerjaan_id, d.tambahan
+            GROUP BY x.pekerjaan_id, d.tambahan, d.material_id, d.id
 
             UNION ALL
 
             SELECT 
+                d.id,
+                'tambahan' as type,
                 d.pekerjaan_id,
                 d.tambahan,
+                null as material_id,
                 SUM(d.jumlah) AS total_jumlah,
                 SUM(d.estimasi_price) AS total_estimasi_price,
                 MAX(d.satuan) AS satuan
             FROM project_detail_tambahan d
             JOIN pekerjaan w ON d.pekerjaan_id = w.id
             WHERE d.project_id = a.project_id
-            GROUP BY d.pekerjaan_id, d.tambahan
+            GROUP BY d.pekerjaan_id, d.tambahan, d.id
         ) t
         WHERE t.pekerjaan_id = a.pekerjaan_id
     ) AS detail
@@ -125,16 +134,37 @@ JOIN pekerjaan AS b ON a.pekerjaan_id = b.id
 
     public function anggarandetail(Request $request): RedirectResponse
     {
-  
-        ProjectDetailTambahan::create([
-            'project_id' => $request->project_id,
-            'pekerjaan_id' => $request->pekerjaan_id,
-            'tambahan' => $request->tambahan,
-            'satuan' => $request->satuan,
-            'jumlah' => $request->qty,
-            'estimasi_price' => $request->harga,
-            'rab' => $request->rab,
-        ]);
+        if($request->id == '' || $request->id == null)
+        {
+            ProjectDetailTambahan::create([
+                'project_id' => $request->project_id,
+                'pekerjaan_id' => $request->pekerjaan_id,
+                'tambahan' => $request->tambahan,
+                'satuan' => $request->satuan,
+                'jumlah' => $request->qty,
+                'estimasi_price' => $request->harga,
+                'rab' => $request->rab,
+            ]);
+        }else{
+            if($request->type == 'bom')
+            {
+                ProjectDetail::where('id', $request->id)->update([
+                    'tambahan' => $request->tambahan,
+                    'satuan' => $request->satuan,
+                    'jumlah' => $request->qty,
+                    'estimasi_price' => $request->harga,
+                ]);
+            }else{
+                ProjectDetailTambahan::where('id', $request->id)->update([
+                    'tambahan' => $request->tambahan,
+                    'satuan' => $request->satuan,
+                    'jumlah' => $request->qty,
+                    'estimasi_price' => $request->harga,
+                ]);
+            }
+
+        }
+        
           
         
         return redirect()->route('anggarans.index')->with('success', 'Detail anggaran berhasil ditambahkan.');

@@ -115,6 +115,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('suppliers/{supplier}', [SupplierController::class, 'Destroy'])->name('suppliers.destroy');
     Route::get('suppliers/{supplier}/material', [SupplierController::class, 'material'])->name('suppliers.material');
     Route::delete('suppliermaterials/{supplier}', [SupplierController::class, 'DestroyMaterial'])->name('suppliers.materials.destroy');
+    Route::get('suppliersmaterial/{supplier}', [SupplierController::class, 'materialjson'])->name('suppliers.materialjson');
 
     Route::get('materials', [MaterialController::class, 'Index'])->name('materials.index');
     Route::get('materials/create', [MaterialController::class, 'Create'])->name('materials.create');

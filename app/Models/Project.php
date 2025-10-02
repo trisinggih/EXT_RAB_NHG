@@ -14,5 +14,7 @@ class Project extends Model
         'name',
         'description',
         'client_id',
+        'start_date',
+        'end_date',
     ];
 }

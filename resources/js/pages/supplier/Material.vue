@@ -36,9 +36,10 @@ const props = defineProps<{
 }>();
 
 const form = useForm({
-  material_id: '',
+  material_id: null,
   supplier_id: props.supplier.id,
-  price: ''
+  price: '',
+  link: '',
 });
 
 const selectedMaterial = ref<Material | null>(null);
@@ -47,7 +48,6 @@ const adding = ref(false);
 
 const submitMaterial = () => {
   adding.value = true;
-
   form.post(route('suppliers.materials.store'), {
     onSuccess: () => {
       form.reset();
@@ -84,6 +84,8 @@ watch(
   (newId) => {
     const selected = props.ms_material.find(item => item.id === Number(newId));
     selectedMaterial.value = selected || null;
+    form.material_id = selectedMaterial.value?.id || 0;
+    console.log(selectedMaterial.value);
   }
 );
 </script>
@@ -149,6 +151,16 @@ watch(
           />
         </div>
 
+        <div>
+          <Label for="link" class="block mb-1">Link</Label>
+          <Input
+            id="link"
+            v-model="form.link"
+            type="text"
+            placeholder="Masukkan link jika ada"
+          />
+        </div>
+
         <!-- Submit Button -->
         <Button type="submit" :disabled="adding">
           {{ adding ? 'Menyimpan...' : 'Tambah Material' }}
@@ -163,6 +175,7 @@ watch(
             <th class="border border-gray-300 px-4 py-2 text-left">Nama Material</th>
             <th class="border border-gray-300 px-4 py-2 text-left">Satuan</th>
             <th class="border border-gray-300 px-4 py-2 text-left">Price</th>
+            <th class="border border-gray-300 px-4 py-2 text-left">Link</th>
             <th class="border border-gray-300 px-4 py-2 text-left w-[100px]">Aksi</th>
           </tr>
         </thead>
@@ -176,6 +189,13 @@ watch(
             <td class="border border-gray-300 px-4 py-2">{{ material.material_name }}</td>
             <td class="border border-gray-300 px-4 py-2">{{ material.material_satuan }}</td> 
             <td class="border border-gray-300 px-4 py-2">Rp {{ material.price.toLocaleString('id-ID') }}</td>
+            <td class="border border-gray-300 px-4 py-2">
+              <a :href="material.link" target="_blank"><button
+                class="text-blue-500 hover:underline"
+              >
+                Klik Link
+              </button></a>
+            </td>
             <td class="border border-gray-300 px-4 py-2">
               <Button
                 class="bg-red-500 text-white px-2"

@@ -43,7 +43,7 @@ const handleInput = () => {
                     <Input v-model="form.name" id="name" type="text" placeholder="Enter the name for the product..."></Input>
                     <div class="text-sm text-red-600" v-if="form.errors.name">{{ form.errors.name }}</div>
                 </div>
-                <div class="space-y-2">
+                <div class="space-y-2 hidden">
                     <Label for="price">Price</Label>
                     <Input v-model="form.price" id="price" readonly type="number" placeholder="Enter the price for the product..."></Input>
                     <div class="text-sm text-red-600" v-if="form.errors.price">{{ form.errors.price }}</div>

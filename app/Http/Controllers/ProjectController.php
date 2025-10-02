@@ -38,6 +38,8 @@ class ProjectController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:2048',
             'client_id' => 'required|int',
+            'start_date' => 'required',
+            'end_date' => 'required',
         ]);
         Project::create($data);
         return redirect()->route('projects.index')->with('message', 'Project created successfully.');
@@ -59,6 +61,8 @@ class ProjectController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:2048',
             'client_id' => 'required|int',
+            'start_date' => 'required',
+            'end_date' => 'required',
         ]);
         $project->update($data);
         return redirect()->route('projects.index')->with('message', 'Project updated successfully.');

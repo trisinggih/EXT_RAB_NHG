@@ -178,7 +178,10 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
               class="odd:bg-white even:bg-gray-50 hover:bg-gray-100 transition-colors"
             >
               <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ startIndex + i + 1 }}</td>
-              <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.name }}</td>
+              <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.name }} <br></br>
+                <span>{{ u.start_date }}</span> <b> until </b> 
+                <span>{{ u.end_date }}</span>
+              </td>
               <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.client_name }}</td>
               <td class="px-4 py-3 border-b border-gray-200">{{ u.description ?? '-' }}</td>
               <td class="px-4 py-3 border-b border-gray-200">

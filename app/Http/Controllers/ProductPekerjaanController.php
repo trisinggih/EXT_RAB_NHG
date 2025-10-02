@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProductPekerjaan;
+use App\Models\Pekerjaan;
 use App\Models\ProductDetail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,11 +32,13 @@ class ProductPekerjaanController extends Controller
 
        $idArray = explode(',', $ids);
 
-        $pekerjaan = ProductPekerjaan::join('pekerjaan', 'product_pekerjaan.pekerjaan_id', '=', 'pekerjaan.id')
-            ->select('product_pekerjaan.pekerjaan_id', 'pekerjaan.name as pekerjaan_name')
-            ->whereIn('product_pekerjaan.product_id', $idArray) 
-            ->distinct()
-            ->get();
+        // $pekerjaan = ProductPekerjaan::join('pekerjaan', 'product_pekerjaan.pekerjaan_id', '=', 'pekerjaan.id')
+        //     ->select('product_pekerjaan.pekerjaan_id', 'pekerjaan.name as pekerjaan_name')
+        //     ->whereIn('product_pekerjaan.product_id', $idArray) 
+        //     ->distinct()
+        //     ->get();
+        $pekerjaan = Pekerjaan::get();
+
 
         return response()->json($pekerjaan);
 

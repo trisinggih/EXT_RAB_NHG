@@ -32,7 +32,8 @@ class BomController extends Controller
             'panjang' => 'required',
             'lebar' => 'required',
             'tinggi' => 'required',
-            'estimasi_price' => 'required',
+            'estimasi_price' => 'nullable',
+            'keterangan' => 'nullable'
         ]);
         $cekdata = Bom::where('product_id', $data['product_id'])->where('mark_id', $data['mark_id'])->where('material_id', $data['material_id'])->first();
         if ($cekdata) {
@@ -42,7 +43,8 @@ class BomController extends Controller
                 'panjang' => $data['panjang'],
                 'lebar' => $data['lebar'],
                 'tinggi' => $data['tinggi'],
-                'estimasi_price' => $data['estimasi_price'],
+                'estimasi_price' => 0,
+                'keterangan' => $data['keterangan']
             ]);
         }else{
             Bom::create($data);

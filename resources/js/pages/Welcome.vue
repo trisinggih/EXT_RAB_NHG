@@ -21,16 +21,10 @@ const slides = computed(() => props.banners)
 const services = computed(() => props.services)
 const kontens = computed(() => props.kontens)
 const settingweb = computed(() => props.settingweb)
-
-
-
-
 const currentSlide = ref(0);
-
 
 onMounted(() => {
   console.log('Slides:', slides.value);
-  
   setInterval(() => {
     if (slides.value.length > 0) {
       currentSlide.value = (currentSlide.value + 1) % slides.value.length;

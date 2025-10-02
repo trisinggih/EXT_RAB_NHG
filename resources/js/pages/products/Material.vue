@@ -38,6 +38,7 @@ interface Bom {
   tinggi: number;
   satuan: string;
   estimasi_price: number;
+  keterangan: string;
 }
 
 const page = usePage();
@@ -226,14 +227,16 @@ onMounted(() => {
       lebar: bom.lebar ?? 0,
       tinggi: bom.tinggi ?? 0,
       estimasi_price: bom.estimasi_price ?? 0,
+      keterangan: bom.keterangan ?? "",
     };
   });
 });
 
 const getMaterialById = (id: string | number) => {
-  const material = msmat.value.find(m => m.id === Number(id));
+  // const material = msmat.value.find(m => m.id === Number(id));
 
-  console.log(material)
+  // console.log(material.satuan)
+  return msmat.value.find(m => m.id === Number(id));
 };
 
 
@@ -248,7 +251,8 @@ const saveRow = (row: any) => {
     lebar: row.lebar,
     tinggi: row.tinggi,
     satuan: row.satuan,
-    estimasi_price: row.estimasi_price,
+    estimasi_price: 0,
+    keterangan: row.keterangan,
   });
 
   router.visit(window.location.pathname, { replace: true });
@@ -343,7 +347,7 @@ const deleteRow = (row: any) => {
             <th class="px-4 py-3 border-b border-gray-200 text-left bg-gray-500 text-white w-[100px]">Panjang</th>
             <th class="px-4 py-3 border-b border-gray-200 text-left bg-gray-500 text-white w-[100px]">Lebar</th>
             <th class="px-4 py-3 border-b border-gray-200 text-left bg-gray-500 text-white w-[100px]">Tinggi</th>
-            <th class="px-4 py-3 border-b border-gray-200 text-left bg-gray-500 text-white w-[200px]">Estimasi</th>
+            <th class="px-4 py-3 border-b border-gray-200 text-left bg-gray-500 text-white w-[200px]">Keterangan</th>
             <th class="px-4 py-3 border-b border-gray-200 text-left bg-gray-500 text-white w-[100px]">Action</th>
           </tr>
         </thead>
@@ -357,7 +361,7 @@ const deleteRow = (row: any) => {
               <select 
                 v-model="m.materialId"
                 class="border border-gray-200 p-2 w-full"
-                @change="m.satuan = getMaterialById(m.materialId)?.satuan || 'PCS'"
+                @change="m.satuan = getMaterialById(m.materialId)?.satuan"
               >
                 <option disabled value="">-- Pilih Material --</option>
                 <option v-for="(materials, idm) in msmat" :key="idm" :value="materials.id">
@@ -384,7 +388,7 @@ const deleteRow = (row: any) => {
             </td>
 
             <td class="border-b border-gray-200">
-              <input v-model="m.estimasi_price" type="number" class="border border-gray-200 p-2 w-[200px]" />
+              <input v-model="m.keterangan" type="text" class="border border-gray-200 p-2 w-[200px]" />
             </td>
 
             <td class="border-b border-gray-200 w-[150px]">
