@@ -47,17 +47,24 @@ const settingweb = computed(() => props.settingweb)
           
       
         <nav class="flex space-x-6 text-white">
-          <a href="/#home" class="hover:underline">Home</a>
-          <a href="/#layanan" class="hover:underline">Layanan Kami</a>
-          <a href="/blog" class="hover:underline">Blog</a>
-          <a href="/#kontak" class="hover:underline">Hubungi Kami</a>
+          <a href="/#home" class="hover:underline mt-2">Home</a>
+          <a href="/#layanan" class="hover:underline mt-2">Layanan Kami</a>
+          <a href="/blog" class="hover:underline mt-2">Blog</a>
+          <a href="/allprojects" class="hover:underline mt-2">Projects</a>
+          <a href="/#kontak" class="hover:underline mt-2">Hubungi Kami</a>
+
+          <a href="/supplier" class="hover:underline btn bg-yellow-600 p-2 rounded-lg ">Supplier</a>
         </nav>
       </div>
     </header>   
 
     <!-- Product Section -->
-    <section class="px-6 py-12 grid md:grid-cols-4 gap-8 container mx-auto mt-20 ">
-      <div v-for="(blog, index) in blogs" :key="index" class="bg-warning border-1 shadow rounded overflow-hidden ">
+     
+    <section class="px-6 py-12  container mx-auto mt-20 ">
+      <h3 class="mb-5 text-xl">Blogs</h3>
+      <div class="grid md:grid-cols-4 gap-8">
+
+        <div v-for="(blog, index) in blogs" :key="index" class="bg-warning border-1 shadow rounded overflow-hidden ">
         <div
             class="bg-white shadow rounded overflow-hidden h-[200px] bg-cover bg-center"
             :style="{
@@ -73,6 +80,11 @@ const settingweb = computed(() => props.settingweb)
           </p>
         </div>
       </div>
+
+      </div>
+
+      
+
     </section>
 
 

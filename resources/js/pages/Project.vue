@@ -1,38 +1,17 @@
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import {  computed } from "vue";
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { Link } from '@inertiajs/vue3';
 
-// const slides = [
-//   "/images/slider1.jpg",
-//   "/images/slider2.jpg",
-//   "/images/slider3.jpg",
-// ];
-
 const props = defineProps({
-  banners: { type: Array, default: () => [] },
-  services: { type: Array, default: () => [] },
-  kontens: { type: Array, default: () => [] },
+  projects: { type: Array, default: () => [] },
   settingweb: { type: Array, default: () => [] }
 })
 
-const slides = computed(() => props.banners)
-const services = computed(() => props.services)
-const kontens = computed(() => props.kontens)
+const projects = computed(() => props.projects)
 const settingweb = computed(() => props.settingweb)
-const currentSlide = ref(0);
 
-onMounted(() => {
-  console.log('Slides:', slides.value);
-  setInterval(() => {
-    if (slides.value.length > 0) {
-      currentSlide.value = (currentSlide.value + 1) % slides.value.length;
-    }
-  }, 5000);
-});
-
-const activeSlide = computed(() => slides.value[currentSlide.value] || {})
 
 
 </script>
@@ -68,99 +47,54 @@ const activeSlide = computed(() => slides.value[currentSlide.value] || {})
           
       
         <nav class="flex space-x-6 text-white">
-          <a href="#home" class="hover:underline mt-2">Home</a>
-          <a href="#layanan" class="hover:underline mt-2">Layanan Kami</a>
+          <a href="/#home" class="hover:underline mt-2">Home</a>
+          <a href="/#layanan" class="hover:underline mt-2">Layanan Kami</a>
           <a href="/blog" class="hover:underline mt-2">Blog</a>
           <a href="/allprojects" class="hover:underline mt-2">Projects</a>
-          <a href="#kontak" class="hover:underline mt-2">Hubungi Kami</a>
+          <a href="/#kontak" class="hover:underline mt-2">Hubungi Kami</a>
 
           <a href="/supplier" class="hover:underline btn bg-yellow-600 p-2 rounded-lg ">Supplier</a>
         </nav>
       </div>
-    </header>
-
-    <!-- Hero Section / Image Slider -->
-    <section id="home" class="relative w-full h-[80vh] mt-0"> 
-      <!-- Images -->
-      <div class="absolute inset-0 overflow-hidden">
-        <transition-group name="fade" tag="div">
-          <img
-            v-for="(slide, index) in slides"
-            v-show="currentSlide === index"
-            :key="slide.id"
-            :src="`/images/${slide.img_banner}`"
-            :alt="slide.title_banner"
-            class="absolute inset-0 w-full h-full object-cover"
-          />
-        </transition-group>
-      </div>
-
-      <!-- Overlay content -->
-      <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center text-white">
-        <h2 class="text-3xl font-light drop-shadow-md">
-          {{ activeSlide.title_banner }}
-        </h2>
-        <button
-          class="mt-6 px-6 py-2 bg-white text-indigo-500 rounded-full shadow hover:bg-gray-100"
-        >
-          Our Services →
-        </button>
-      </div>
-
-      <!-- Slider Controls -->
-      <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
-        <button
-          v-for="(slide, index) in slides"
-          :key="index"
-          @click="currentSlide = index"
-          :class="[
-            'w-3 h-3 rounded-full',
-            currentSlide === index ? 'bg-white' : 'bg-gray-400'
-          ]"
-        ></button>
-      </div>
-    </section>
-
-    <!-- Vision Section -->
-    <section id="layanan" class="py-12 px-6 text-center">
-      <h3 class="text-2xl font-semibold mb-2">Layanan Kami</h3>
-      <p class="text-gray-600 mb-10">
-        Layanan kami sebagai pengabdian kami untuk negara dan masyarakat
-      </p>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto" 
-       >
-        
-        <div  v-for="(service, index) in services"
-        :key="index">
-          <div class="w-12 h-12 mx-auto bg-sky-200 rounded-full flex items-center justify-center">
-            <div v-html="service.icon"></div>
-          </div>
-          <h4 class="mt-3 font-semibold">{{service.name}}</h4>
-          <p class="text-gray-500 text-sm">{{service.description}}</p>
-        </div>
-        
-      </div>
-    </section>
+    </header>   
 
     <!-- Product Section -->
-    <section class="px-6 py-12 grid md:grid-cols-2 gap-8 container mx-auto">
-      <div class="bg-white shadow rounded overflow-hidden h-[580px]">
-        <img :src="kontens[0].img_konten" alt="Product" class="w-full" />
-        <div class="p-6">
-          <h4 class="font-bold text-lg mb-2">{{ kontens[0].judul_konten   }}</h4>
-          <p class="text-gray-600 mb-4">
-            {{ kontens[0].konten   }}
-          </p>
-        </div>
-      </div>
-      <div class="bg-white shadow rounded overflow-hidden mt-[100px]">
-        <img :src="kontens[1].img_konten" alt="Product" class="w-full" />
-        <div class="p-6">
-          <h4 class="font-bold text-lg mb-2">{{ kontens[1].judul_konten   }}</h4>
-          <p class="text-gray-600 mb-4">
-            {{ kontens[1].konten   }}
-          </p>
-        </div>
+    <section class="px-6 py-12 container mx-auto mt-20 ">
+        <h3 class="mb-5 text-xl">Projects</h3>
+      <div class="overflow-auto rounded border border-gray-200 shadow-sm">
+        
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 sticky top-0 z-10">
+            <tr class="text-gray-700">
+              <th class="px-4 py-3 border-b border-gray-200 text-left">No</th>
+              <th class="px-4 py-3 border-b border-gray-200 text-left">Name</th>
+              <th class="px-4 py-3 border-b border-gray-200 text-left">Client</th>
+              <th class="px-4 py-3 border-b border-gray-200 text-left">Description</th>
+              <th class="px-4 py-3 border-b border-gray-200 text-left w-[170px]">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(u,i) in projects"
+              :key="u.id"
+              class="odd:bg-white even:bg-gray-50 hover:bg-gray-100 transition-colors"
+            >
+              <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ i + 1 }}</td>
+              <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.name }} 
+              </td>
+              <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.client_name }}</td>
+              <td class="px-4 py-3 border-b border-gray-200">{{ u.description ?? '-' }}</td>
+              <td class="px-4 py-3 border-b border-gray-200">
+                <div class="flex gap-1">
+                    <Button class="bg-green-500 text-white p-2 rounded cursor-pointer">
+                      Download RAB
+                    </Button>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
       </div>
     </section>
 

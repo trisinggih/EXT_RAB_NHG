@@ -270,6 +270,27 @@ const deleteRow = (row: any) => {
   });
   marks.value.splice(rows.value.indexOf(row), 1);
 };
+
+
+
+const formatNumber = (value) => {
+  if (value === null || value === undefined || value === '') return ''
+  return new Intl.NumberFormat('id-ID').format(value)
+}
+
+// Fungsi parsing string jadi angka murni
+const parseNumber = (value) => Number(value.replace(/\D/g, '') || 0)
+
+// Format otomatis untuk semua input angka
+const handleNumberInput = (row, key, event) => {
+  const val = event.target.value
+  const numeric = parseNumber(val)
+  row[key] = numeric
+  event.target.value = formatNumber(numeric)
+}
+
+
+
 </script>
 
 <template>
@@ -375,16 +396,28 @@ const deleteRow = (row: any) => {
             </td>
 
             <td class="border-b border-gray-200">
-              <input v-model="m.jumlah" type="number" class="border border-gray-200 p-2 w-[100px]" />
+              <input 
+              :value="formatNumber(m.jumlah)"
+              @input="handleNumberInput(m, 'jumlah', $event)"
+              type="number" class="border border-gray-200 p-2 w-[100px]" />
             </td>
             <td class=" border-b border-gray-200">
-              <input v-model="m.panjang" type="number" class="border border-gray-200 p-2 w-[100px]" />
+              <input  
+              :value="formatNumber(m.panjang)"
+              @input="handleNumberInput(m, 'panjang', $event)"
+              type="number" class="border border-gray-200 p-2 w-[100px]" />
             </td>
             <td class="border-b border-gray-200">
-              <input v-model="m.lebar" type="number" class="border border-gray-200 p-2 w-[100px]" />
+              <input 
+              :value="formatNumber(m.lebar)"
+              @input="handleNumberInput(m, 'lebar', $event)"
+              type="number" class="border border-gray-200 p-2 w-[100px]" />
             </td>
             <td class="border-b border-gray-200">
-              <input v-model="m.tinggi" type="number" class="border border-gray-200 p-2 w-[100px]" />
+              <input 
+              :value="formatNumber(m.tinggi)"
+              @input="handleNumberInput(m, 'tinggi', $event)"
+              type="number" class="border border-gray-200 p-2 w-[100px]" />
             </td>
 
             <td class="border-b border-gray-200">

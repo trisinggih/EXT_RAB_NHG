@@ -67,14 +67,6 @@ const handleInput = () => {
                     <div class="text-sm text-red-600" v-if="form.errors.client_id">{{ form.errors.client_id }}</div>
                 </div>
                 <div class="space-y-2">
-                    <Label for="price">Start Date</Label>
-                    <Input v-model="form.start_date" id="start_date" type="date" placeholder="" />
-                </div>
-                <div class="space-y-2">
-                    <Label for="price">End Date</Label>
-                    <Input v-model="form.end_date" id="end_date" type="date" placeholder="" />
-                </div>
-                <div class="space-y-2">
                     <Label for="description">Description</Label>
                     <Textarea v-model="form.description" id="description" type="text" placeholder="" />
                     <div class="text-sm text-red-600" v-if="form.errors.description">{{ form.errors.description }}</div>

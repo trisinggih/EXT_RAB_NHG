@@ -57,6 +57,25 @@ class SupplierController extends Controller
         
     }
 
+    public function storeMaterialsSup(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'supplier_id' => 'required|int',
+            'material_id' => 'required|int',
+            'price' => 'required|numeric',
+            'link' => 'nullable',
+        ]);
+        $cekdata = SupplierMaterials::where('supplier_id', $data['supplier_id'])->where('material_id', $data['material_id'])->count();
+        if($cekdata > 0) {
+            SupplierMaterials::where('supplier_id', $data['supplier_id'])->where('material_id', $data['material_id'])->update($data);
+            return redirect()->route('supplier.supplier.material', $data['supplier_id'])->with('message', 'Supplier updated successfully.');
+        } else {
+            SupplierMaterials::create($data);
+            return redirect()->route('supplier.supplier.material', $data['supplier_id'])->with('message', 'Supplier added successfully.');
+        }
+        
+    }
+
     public function edit(Suppliers $supplier): Response
     {
 
@@ -74,16 +93,37 @@ class SupplierController extends Controller
         return Inertia::render('supplier/Material', compact('supplier', 'materials', 'ms_material'));
     }
 
+    public function materialSup(Suppliers $supplier): Response
+    {
+        $materials = SupplierMaterials::join('material', 'supplier_material.material_id', '=', 'material.id')
+            ->select('supplier_material.*', 'material.name as material_name', 'material.satuan as material_satuan')
+            ->where('supplier_material.supplier_id', $supplier->id)
+            ->get();
+
+        $ms_material = Materials::where('deleted_at', null)->get();
+        return Inertia::render('supplier/MaterialSupplier', compact('supplier', 'materials', 'ms_material'));
+    }
+
     public function materialjson($supplier): \Illuminate\Http\JsonResponse
     {
         $materials = SupplierMaterials::join('supplier', 'supplier_material.supplier_id', '=', 'supplier.id')
             ->join('material', 'supplier_material.material_id', '=', 'material.id')
-            ->select('supplier_material.*','material.name as material_name', 'material.satuan as material_satuan', 'supplier.name as supplier_name', 'supplier.address as supplier_address', 'supplier.telp as supplier_telp', 'supplier.pic as supplier_pic')
+            ->select(
+                'supplier_material.*',
+                'material.name as material_name',
+                'material.satuan as material_satuan',
+                'supplier.name as supplier_name',
+                'supplier.address as supplier_address',
+                'supplier.telp as supplier_telp',
+                'supplier.pic as supplier_pic'
+            )
             ->where('supplier_material.material_id', $supplier)
+            ->orderBy('supplier_material.price', 'ASC') // ⬅️ urutkan berdasarkan harga termurah
             ->get();
 
-         return response()->json($materials);
+        return response()->json($materials);
     }
+
 
     public function update(Request $request, Suppliers $supplier): RedirectResponse
     {
@@ -109,6 +149,15 @@ class SupplierController extends Controller
         $material = SupplierMaterials::where('id',$id)->delete();
          
         return redirect()->route('suppliers.material', $data['supplier_id'])->with('message', 'Supplier updated successfully.');
+
+    }
+
+    public function DestroyMaterialSup($id): RedirectResponse
+    {
+        $data = SupplierMaterials::where('id',$id)->first();
+        $material = SupplierMaterials::where('id',$id)->delete();
+         
+        return redirect()->route('supplier.supplier.material', $data['supplier_id'])->with('message', 'Supplier updated successfully.');
 
     }
 

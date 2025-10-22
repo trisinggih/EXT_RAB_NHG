@@ -20,16 +20,57 @@ use App\Http\Controllers\ProjectProductController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TestEmail;
 
 Route::get('/', [FrontHomeController::class, 'Index'])->name('home');
 Route::get('/blog', [FrontHomeController::class, 'Blog'])->name('blog');
+
+Route::get('/allprojects', [FrontHomeController::class, 'Project'])->name('allproject');
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('supplierdashboard', function () {
+    return Inertia::render('DashboardSupplier');
+})->middleware(['auth:supplier'])->name('supplier.dashboard');
+
 // this will create a group route. Those authorize to access them are authenticated and verified
 // users.
+Route::middleware(['auth:supplier'])
+    ->prefix('supplier')
+    ->as('supplier.')
+    ->group(function () {
+
+        Route::get('dashboard', fn() => Inertia::render('DashboardSupplier'))
+            ->name('dashboard');
+
+        Route::get('materials', [MaterialController::class, 'Index'])
+            ->name('materials.index');
+        Route::get('materials/create', [MaterialController::class, 'Create'])
+            ->name('materials.create');
+        Route::post('materials', [MaterialController::class, 'Store'])
+            ->name('materials.store');
+        Route::get('materials/{material}/edit', [MaterialController::class, 'Edit'])
+            ->name('materials.edit');
+        Route::put('materials/{material}', [MaterialController::class, 'Update'])
+            ->name('materials.update');
+        Route::delete('materials/{material}', [MaterialController::class, 'Destroy'])
+            ->name('materials.destroy');
+
+        Route::post('suppliermaterials', [SupplierController::class, 'storeMaterialsSup'])->name('supplier.material.store');
+
+        Route::get('{supplier}/material', [SupplierController::class, 'materialSup'])->name('supplier.material');
+        Route::delete('suppliermaterial/{supplier}', [SupplierController::class, 'DestroyMaterialSup'])->name('supplier.material.destroy');
+        Route::get('suppliermaterial/{supplier}', [SupplierController::class, 'materialjson'])->name('supplier.materialjson');
+
+
+
+    });
+
+
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('bom', [ProductController::class, 'Index'])->name('products.index');
     Route::get('bom/create', [ProductController::class, 'Create'])->name('products.create');
@@ -113,6 +154,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('suppliers/{supplier}/edit', [SupplierController::class, 'Edit'])->name('suppliers.edit');
     Route::put('suppliers/{supplier}', [SupplierController::class, 'Update'])->name('suppliers.update');
     Route::delete('suppliers/{supplier}', [SupplierController::class, 'Destroy'])->name('suppliers.destroy');
+    
+    
     Route::get('suppliers/{supplier}/material', [SupplierController::class, 'material'])->name('suppliers.material');
     Route::delete('suppliermaterials/{supplier}', [SupplierController::class, 'DestroyMaterial'])->name('suppliers.materials.destroy');
     Route::get('suppliersmaterial/{supplier}', [SupplierController::class, 'materialjson'])->name('suppliers.materialjson');
@@ -127,6 +170,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
    
 
 });
+
+
+
     Route::get('anggaran', [AnggaranController::class, 'Index'])->name('anggarans.index');
 
     Route::get('anggaranfront', [AnggaranController::class, 'IndexFront'])->name('anggarans.front');
@@ -136,6 +182,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('projectrabawal/{id}', [AnggaranController::class, 'projectrabawal'])->name('anggaran.projectrabawal');
     Route::get('projectrabkedua/{id}', [AnggaranController::class, 'projectrabkedua'])->name('anggaran.projectrabkedua');
+    Route::get('projectrabfinal/{id}', [AnggaranController::class, 'projectrabfinal'])->name('anggaran.projectrabfinal');
     Route::get('anggarandelete/{tambahan}/{id}', [AnggaranController::class, 'anggarandelete'])->name('anggaran.delete');
     Route::get('anggaranpekerjaandelete/{id}', [AnggaranController::class, 'anggaranpekerjaandelete'])->name('anggaran.pekerjaandelete');
     Route::post('anggarandetail', [AnggaranController::class, 'anggarandetail'])->name('anggaran.detail');
@@ -150,6 +197,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/hasildashboard', [DashboardController::class, 'index']);
     Route::get('/hasildashboardchart', [DashboardController::class, 'grafik']);
 
+
+    Route::get('/send-test-email', function () {
+        Mail::to('trisinggih.jnet@gmail.com')->send(new TestEmail());
+        return 'Email berhasil dikirim!';
+    });
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

@@ -189,7 +189,17 @@ JOIN pekerjaan AS b ON a.pekerjaan_id = b.id
             $project->rab = '3';
             $project->save();
         }
-        return redirect()->route('anggarans.index')->with('success', 'RAB Awal berhasil diapprove.');
+        return redirect()->route('anggarans.index')->with('success', 'RAB Kedua berhasil diapprove.');
+    }
+
+    public function projectrabfinal(Request $request, $id): RedirectResponse
+    {
+        $project = Project::find($id);
+        if ($project) {
+            $project->rab = '4';
+            $project->save();
+        }
+        return redirect()->route('anggarans.index')->with('success', 'RAB Final berhasil diapprove.');
     }
 
 

@@ -19,21 +19,24 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const props = defineProps({
   clients: { type: Array, default: () => [] }
-})
+});
 
-const clients = computed(() => props.clients)
+const clients = computed(() => props.clients);
+
+const today = new Date().toISOString().split('T')[0];
 
 const form = useForm({
-    name: '',
-    price: 0,
-    description: '',
-    client_id: '',
-    start_date: '',
-    end_date: '',
+  name: '',
+  price: 0,
+  description: '',
+  client_id: '',
+  start_date: today, 
+  end_date: today,   
 });
+
 const handleInput = () => {
-    form.post(route('projects.store'));
-}
+  form.post(route('projects.store'));
+};
 
 </script>
 
@@ -64,14 +67,6 @@ const handleInput = () => {
                       </option>
                     </select>
                     <div class="text-sm text-red-600" v-if="form.errors.client_id">{{ form.errors.client_id }}</div>
-                </div>
-                <div class="space-y-2">
-                    <Label for="price">Start Date</Label>
-                    <Input v-model="form.start_date" id="start_date" type="date" placeholder="Enter the price for the product..."></Input>
-                </div>
-                <div class="space-y-2">
-                    <Label for="price">End Date</Label>
-                    <Input v-model="form.end_date" id="end_date" type="date" placeholder="Enter the price for the product..."></Input>
                 </div>
 
                 <div class="space-y-2">

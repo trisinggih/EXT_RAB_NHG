@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { ref, defineProps } from 'vue';
+import { ref, defineProps, reactive } from 'vue';
 
 interface Product {
   id: number;
@@ -48,13 +48,24 @@ const pekerjaanForm = useForm({
 
 // form detail
 const detailForm = useForm({
-  pekerjaan_id: null as number | null,
   product_id: props.product.id,
-  tambahan: '',
-  jumlah: 1,
-  satuan: '',
-  estimasi_price: 0,
+  pekerjaan_id: "",
+  tambahan: "",
+  jumlah: "",
+  satuan: "",
+  estimasi_price: "",
 });
+
+function formatNumber(value) {
+  if (!value) return "";
+  return new Intl.NumberFormat("id-ID").format(value);
+}
+
+function updateNumber(event, field) {
+  const raw = event.target.value.replace(/\D/g, "");
+  detailForm[field] = raw ? parseInt(raw) : "";
+  event.target.value = formatNumber(detailForm[field]);
+}
 
 // simpan pekerjaan
 const savePekerjaan = () => {
@@ -157,20 +168,23 @@ const deleteDetail = (id: number) => {
 
                             <table class="w-full text-sm ml-5">
                                 <tr v-for="(d, idx) in props.productdetail.filter(dd => dd.pekerjaan_id === p.id)" :key="idx" >
-                                    <td class="px-4 py-3 border ">
+                                    <td class="px-3 py-2 border ">
                                         {{ d.tambahan }}
                                     </td>
-                                    <td class="px-4 py-3 border  w-[100px]">
+                                    <td class="px-3 py-2 border  w-[100px]">
                                         {{ d.jumlah }}
                                     </td>
-                                    <td class="px-4 py-3 border  w-[100px]">
+                                    <td class="px-3 py-2 border  w-[100px]">
                                         {{ d.satuan }}
                                     </td>
-                                    <td class="px-4 py-3 border  w-[200px]">
+                                    <td class="px-3 py-2 border  w-[200px]">
                                         {{ Number(d.estimasi_price).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) }}
                                     </td>
-                                    <td class="px-4 py-3 border w-[150px]">
-                                        <button class="btn bg-red-500 p-2 text-white rounded" @click="deleteDetail(d.id)">
+                                    <td class="px-3 py-2 border  w-[200px]">
+                                        {{ Number((d.estimasi_price*d.jumlah)).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) }}
+                                    </td>
+                                    <td class="px-3 py-2 border w-[150px]">
+                                        <button class="btn bg-red-500 p-1 text-white rounded" @click="deleteDetail(d.id)">
                                             Hapus
                                         </button>
                                     </td>
@@ -222,36 +236,67 @@ const deleteDetail = (id: number) => {
     <!-- Modal Detail -->
     <div
       v-if="showDetailModal"
-      class="fixed inset-0 bg-opacity-10 flex items-center justify-center z-50" style="background-color: rgb(0, 0, 0, 0.5);"
+      class="fixed inset-0 bg-opacity-10 flex items-center justify-center z-50"
+      style="background-color: rgb(0, 0, 0, 0.5);"
     >
       <div class="bg-white rounded shadow-lg p-6 w-[500px]">
         <h2 class="font-semibold text-lg mb-3">Tambah Detail</h2>
+
         <div class="grid gap-3">
-          <input
-            v-model="detailForm.tambahan"
-            type="text"
-            class="border p-2 w-full"
-            placeholder="Komponen"
-          />
-          <input
-            v-model="detailForm.jumlah"
-            type="number"
-            class="border p-2 w-full"
-            placeholder="Jumlah"
-          />
-          <input
-            v-model="detailForm.satuan"
-            type="text"
-            class="border p-2 w-full"
-            placeholder="Satuan"
-          />
-          <input
-            v-model="detailForm.estimasi_price"
-            type="number"
-            class="border p-2 w-full"
-            placeholder="Estimasi Harga"
-          />
+          <div>
+            <label class="block text-sm font-medium mb-1">Komponen</label>
+            <input
+              v-model="detailForm.tambahan"
+              type="text"
+              class="border p-2 w-full rounded"
+              placeholder="Contoh: Pengecatan"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Jumlah</label>
+            <input
+              type="text"
+              class="border p-2 w-full rounded"
+              placeholder="Contoh: 10"
+              :value="formatNumber(detailForm.jumlah)"
+              @input="updateNumber($event, 'jumlah')"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Satuan</label>
+            <input
+              v-model="detailForm.satuan"
+              type="text"
+              class="border p-2 w-full rounded"
+              placeholder="Contoh: Unit"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Estimasi Harga /Unit</label>
+            <input
+              type="text"
+              class="border p-2 w-full rounded"
+              placeholder="Contoh: 1,000,000"
+              :value="formatNumber(detailForm.estimasi_price)"
+              @input="updateNumber($event, 'estimasi_price')"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Total Harga</label>
+            <input
+              type="text"
+              class="border p-2 w-full rounded"
+              readonly
+              :value="formatNumber((detailForm.estimasi_price * detailForm.jumlah))"
+            />
+          </div>
+
         </div>
+
         <div class="flex justify-end gap-2 mt-4">
           <button
             @click="showDetailModal = false"
@@ -268,5 +313,6 @@ const deleteDetail = (id: number) => {
         </div>
       </div>
     </div>
+
   </AppLayout>
 </template>

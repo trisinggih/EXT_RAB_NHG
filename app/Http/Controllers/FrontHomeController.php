@@ -7,6 +7,7 @@ use App\Models\Services;
 use App\Models\Konten;
 use App\Models\SettingWeb;
 use App\Models\Blogs;
+use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -34,6 +35,19 @@ class FrontHomeController extends Controller
         $settweb = SettingWeb::get();
         return Inertia::render('Blog', [
             'blogs' => $blogs,
+            'settingweb' => $settweb
+        ]);
+    }
+
+    public function project(): Response
+    {
+        $projects = Project::join('client', 'project.client_id', '=', 'client.id')
+        ->select('project.*', 'client.name as client_name') 
+        ->orderBy('project.id', 'desc')
+        ->get();
+        $settweb = SettingWeb::get();
+        return Inertia::render('Project', [
+            'projects' => $projects,
             'settingweb' => $settweb
         ]);
     }

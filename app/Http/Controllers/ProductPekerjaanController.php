@@ -20,8 +20,11 @@ class ProductPekerjaanController extends Controller
             'product_id' => 'required',
             'pekerjaan_id' => 'required',
         ]);
-      
-        ProductPekerjaan::create($data);
+        $cek = ProductPekerjaan::where('product_id', $request->product_id)->where('pekerjaan_id',$request->pekerjaan_id)->count();
+        if($cek == 0){
+            ProductPekerjaan::create($data);
+        }
+        
 
          
         return redirect()->route('products.services', $data['product_id'])->with('message', 'Service created successfully.');

@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AppLayout from '@/layouts/AppLayout.vue';
+import SupplierLayout from '@/layouts/SupplierLayout.vue';
 import { Head, useForm, router  } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 
@@ -48,7 +48,7 @@ const adding = ref(false);
 
 const submitMaterial = () => {
   adding.value = true;
-  form.post(route('suppliers.materials.store'), {
+  form.post('/supplier/suppliermaterials', {
     onSuccess: () => {
       form.reset();
       form.supplier_id = props.supplier.id;
@@ -64,7 +64,7 @@ const submitMaterial = () => {
 
 const handleMaterialDeletion = (materialID: number) => {
   if (confirm('Are you sure you want to delete this material?')) {
-    router.delete(route('suppliers.materials.destroy', { id: materialID }), {
+    router.delete(route('supplier.supplier.material.destroy', { id: materialID }), {
       preserveScroll: true,
       onSuccess: () => {
         props.materials = props.materials.filter(material => material.id !== materialID)
@@ -109,7 +109,7 @@ watch(displayPrice, (val) => {
 <template>
   <Head title="Edit a supplier" />
 
-  <AppLayout :breadcrumbs="[{ title: 'Edit a supplier', href: `/suppliers/${props.supplier.id}` }]">
+  <SupplierLayout :breadcrumbs="[{ title: 'Edit a supplier', href: `/suppliers/${props.supplier.id}` }]">
     <div class="mb-6">
       <h1 class="text-lg font-semibold text-white bg-primary px-5 py-3 rounded-se-xl shadow border-b-2 border-secondary">
         Data Material Supplier
@@ -226,5 +226,5 @@ watch(displayPrice, (val) => {
         </tbody>
       </table>
     </div>
-  </AppLayout>
+  </SupplierLayout>
 </template>

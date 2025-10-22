@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Models\Materials;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,14 @@ class MaterialController extends Controller
 {
     public function index(): Response
     {
-        $material = Materials::paginate(10);
+       $material = Materials::paginate(10);
+
+        if (Auth::guard('supplier')->check()) {
+            return Inertia::render('material/IndexSupplier', [
+                'material' => $material
+            ]);
+        }
+
         return Inertia::render('material/Index', [
             'material' => $material
         ]);
@@ -21,6 +29,9 @@ class MaterialController extends Controller
 
     public function create(): Response
     {
+        if (Auth::guard('supplier')->check()) {
+            return Inertia::render('material/CreateSupplier');
+        }
         return Inertia::render('material/Create');
     }
 
@@ -37,6 +48,9 @@ class MaterialController extends Controller
 
     public function edit(Materials $material): Response
     {
+         if (Auth::guard('supplier')->check()) {
+            return Inertia::render('material/EditSupplier', compact('material'));
+        }
         return Inertia::render('material/Edit', compact('material'));
     }
 
