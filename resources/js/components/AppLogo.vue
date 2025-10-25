@@ -4,5 +4,4 @@ import AppLogoIcon from '@/components/AppLogoIcon.vue';
 
 <template>
     <AppLogoIcon class="w-[80px] fill-current " />
-   
 </template>

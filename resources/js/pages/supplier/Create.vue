@@ -20,6 +20,8 @@ const form = useForm({
   telp: '',
   address: '',
   pic: '',
+  email: '',
+  password: ''
 });
 
 const handleSubmit = () => {
@@ -58,7 +60,7 @@ const handleSubmit = () => {
           <Input
             v-model="form.telp"
             id="telp"
-            type="number"
+            type="text"
             placeholder=""
           />
           <div class="text-sm text-red-600" v-if="form.errors.telp">{{ form.errors.telp }}</div>
@@ -85,6 +87,28 @@ const handleSubmit = () => {
             placeholder=""
           />
           <div class="text-sm text-red-600" v-if="form.errors.address">{{ form.errors.address }}</div>
+        </div>
+
+        <div class="space-y-2">
+          <Label for="telp">Email</Label>
+          <Input
+            v-model="form.email"
+            id="email"
+            type="text"
+            placeholder=""
+          />
+          <div class="text-sm text-red-600" v-if="form.errors.email">{{ form.errors.email }}</div>
+        </div>
+
+        <div class="space-y-2">
+          <Label for="telp">Password</Label>
+          <Input
+            v-model="form.password"
+            id="password"
+            type="text"
+            placeholder=""
+          />
+          <div class="text-sm text-red-600" v-if="form.errors.password">{{ form.errors.password }}</div>
         </div>
 
         <!-- Submit -->

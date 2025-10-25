@@ -675,6 +675,8 @@ const downloadRABPDF = async () => {
       <!-- Tab Content -->
       <div class="py-0">
 
+        <!-- RAB 1 -->
+
           <div v-if="selectedTab === 0">
             <div v-if="selectedProject">
               <div class="alert bg-green-100 w-full mb-5 p-3 rounded" role="alert">
@@ -793,31 +795,38 @@ const downloadRABPDF = async () => {
                 </table>
 
                 <!-- TOTAL DAN RINCIAN -->
-                <div v-if="projectPekerjaan && projectPekerjaan.length > 0" class="mt-6 border-t pt-4">
-                  <div class="text-right font-semibold text-lg mb-2">
+                <div v-if="projectPekerjaan && projectPekerjaan.length > 0" class="mt-6 ">
+                  <!-- <div class="text-right font-semibold text-lg mb-2">
                     Total Awal:
                     <span class="text-blue-600">{{ formatCurrency(grandTotal) }}</span>
-                  </div>
+                  </div> -->
 
                   <table class="w-full text-sm border mt-3">
                     <tbody>
-                      <tr><td class="px-2 py-1">a. Profit 20%</td><td class="px-2 py-1 text-right">{{ formatCurrency(profit) }}</td></tr>
-                      <tr><td class="px-2 py-1">b. Fee Kantor 20%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeKantor) }}</td></tr>
-                      <tr><td class="px-2 py-1">c. Fee Staf 2%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeStaf) }}</td></tr>
-                      <tr><td class="px-2 py-1">d. Fee Konsultan 3%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeKonsultan) }}</td></tr>
-                      <tr><td class="px-2 py-1">e. Fee Bendera 3%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeBendera) }}</td></tr>
-                      <tr><td class="px-2 py-1">f. Fee Marketing 2%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeMarketing) }}</td></tr>
-                      <tr><td class="px-2 py-1">g. PPh 2.65%</td><td class="px-2 py-1 text-right">{{ formatCurrency(pph) }}</td></tr>
-                      <tr><td class="px-2 py-1">h. PPN 11%</td><td class="px-2 py-1 text-right">{{ formatCurrency(ppn) }}</td></tr>
-                    </tbody>
-                    <tfoot>
                       <tr class="font-bold border-t bg-gray-100">
-                        <td class="px-2 py-2 text-right  font-semibold text-lg">TOTAL AKHIR (Grand Total)</td>
+                        <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AWAL</td>
+                        <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
+                          {{ formatCurrency(grandTotal) }}
+                        </td>
+                      </tr>
+                      <tr><td class="px-2 py-2 border">a. Profit 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(profit) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">b. Fee Kantor 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKantor) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">c. Fee Staf 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeStaf) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">d. Fee Konsultan 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKonsultan) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">e. Fee Bendera 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeBendera) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">f. Fee Marketing 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeMarketing) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">g. PPh 2.65%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(pph) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">h. PPN 11%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(ppn) }}</td></tr>
+                      <tr class="font-bold border-t bg-gray-100">
+                        <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AKHIR (Grand Total)</td>
                         <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
                           {{ formatCurrency(grandTotalFinal) }}
                         </td>
                       </tr>
-                    </tfoot>
+                    </tbody>
+                  
+                      
+                  
                   </table>
                 </div>
               </div>
@@ -863,31 +872,37 @@ const downloadRABPDF = async () => {
 
                 <!-- TOTAL DAN RINCIAN -->
                 <div v-if="projectPekerjaan && projectPekerjaan.length > 0" class="mt-6 border-t pt-4">
-                  <div class="text-right font-semibold text-lg mb-2">
-                    Total Awal:
-                    <span class="text-blue-600">{{ formatCurrency(grandTotal) }}</span>
-                  </div>
+         
 
                   <table class="w-full text-sm border mt-3">
                     <tbody>
-                      <tr><td class="px-2 py-1">a. Profit 20%</td><td class="px-2 py-1 text-right">{{ formatCurrency(profit) }}</td></tr>
-                      <tr><td class="px-2 py-1">b. Fee Kantor 20%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeKantor) }}</td></tr>
-                      <tr><td class="px-2 py-1">c. Fee Staf 2%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeStaf) }}</td></tr>
-                      <tr><td class="px-2 py-1">d. Fee Konsultan 3%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeKonsultan) }}</td></tr>
-                      <tr><td class="px-2 py-1">e. Fee Bendera 3%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeBendera) }}</td></tr>
-                      <tr><td class="px-2 py-1">f. Fee Marketing 2%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeMarketing) }}</td></tr>
-                      <tr><td class="px-2 py-1">g. PPh 2.65%</td><td class="px-2 py-1 text-right">{{ formatCurrency(pph) }}</td></tr>
-                      <tr><td class="px-2 py-1">h. PPN 11%</td><td class="px-2 py-1 text-right">{{ formatCurrency(ppn) }}</td></tr>
-                    </tbody>
-                    <tfoot>
                       <tr class="font-bold border-t bg-gray-100">
-                        <td class="px-2 py-2 text-right  font-semibold text-lg">TOTAL AKHIR (Grand Total)</td>
+                        <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AWAL</td>
+                        <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
+                          {{ formatCurrency(grandTotal) }}
+                        </td>
+                      </tr>
+                      <tr><td class="px-2 py-2 border">a. Profit 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(profit) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">b. Fee Kantor 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKantor) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">c. Fee Staf 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeStaf) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">d. Fee Konsultan 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKonsultan) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">e. Fee Bendera 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeBendera) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">f. Fee Marketing 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeMarketing) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">g. PPh 2.65%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(pph) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">h. PPN 11%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(ppn) }}</td></tr>
+                      <tr class="font-bold border-t bg-gray-100">
+                        <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AKHIR (Grand Total)</td>
                         <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
                           {{ formatCurrency(grandTotalFinal) }}
                         </td>
                       </tr>
-                    </tfoot>
+                    </tbody>
+                  
+                      
+                  
                   </table>
+
+
                 </div>
               </div>
 
@@ -898,6 +913,11 @@ const downloadRABPDF = async () => {
 
             </div>
           </div>
+
+
+
+        <!-- RAB 2 -->
+
 
         <div v-if="selectedTab === 1">
 
@@ -1008,31 +1028,37 @@ const downloadRABPDF = async () => {
 
                   <!-- TOTAL DAN RINCIAN -->
                   <div v-if="projectPekerjaan && projectPekerjaan.length > 0" class="mt-6 border-t pt-4">
-                    <div class="text-right font-semibold text-lg mb-2">
-                      Total Awal:
-                      <span class="text-blue-600">{{ formatCurrency(grandTotal) }}</span>
-                    </div>
+                   
 
                     <table class="w-full text-sm border mt-3">
-                      <tbody>
-                        <tr><td class="px-2 py-1">a. Profit 20%</td><td class="px-2 py-1 text-right">{{ formatCurrency(profit) }}</td></tr>
-                        <tr><td class="px-2 py-1">b. Fee Kantor 20%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeKantor) }}</td></tr>
-                        <tr><td class="px-2 py-1">c. Fee Staf 2%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeStaf) }}</td></tr>
-                        <tr><td class="px-2 py-1">d. Fee Konsultan 3%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeKonsultan) }}</td></tr>
-                        <tr><td class="px-2 py-1">e. Fee Bendera 3%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeBendera) }}</td></tr>
-                        <tr><td class="px-2 py-1">f. Fee Marketing 2%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeMarketing) }}</td></tr>
-                        <tr><td class="px-2 py-1">g. PPh 2.65%</td><td class="px-2 py-1 text-right">{{ formatCurrency(pph) }}</td></tr>
-                        <tr><td class="px-2 py-1">h. PPN 11%</td><td class="px-2 py-1 text-right">{{ formatCurrency(ppn) }}</td></tr>
-                      </tbody>
-                      <tfoot>
-                        <tr class="font-bold border-t bg-gray-100">
-                          <td class="px-2 py-2 text-right  font-semibold text-lg">TOTAL AKHIR (Grand Total)</td>
-                          <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
-                            {{ formatCurrency(grandTotalFinal) }}
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
+                    <tbody>
+                      <tr class="font-bold border-t bg-gray-100">
+                        <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AWAL</td>
+                        <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
+                          {{ formatCurrency(grandTotal) }}
+                        </td>
+                      </tr>
+                      <tr><td class="px-2 py-2 border">a. Profit 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(profit) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">b. Fee Kantor 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKantor) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">c. Fee Staf 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeStaf) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">d. Fee Konsultan 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKonsultan) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">e. Fee Bendera 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeBendera) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">f. Fee Marketing 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeMarketing) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">g. PPh 2.65%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(pph) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">h. PPN 11%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(ppn) }}</td></tr>
+                      <tr class="font-bold border-t bg-gray-100">
+                        <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AKHIR (Grand Total)</td>
+                        <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
+                          {{ formatCurrency(grandTotalFinal) }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  
+                      
+                  
+                  </table>
+
+
                   </div>
                 </div>
 
@@ -1083,31 +1109,37 @@ const downloadRABPDF = async () => {
 
                   <!-- TOTAL DAN RINCIAN -->
                   <div v-if="projectPekerjaan && projectPekerjaan.length > 0" class="mt-6 border-t pt-4">
-                    <div class="text-right font-semibold text-lg mb-2">
-                      Total Awal:
-                      <span class="text-blue-600">{{ formatCurrency(grandTotal) }}</span>
-                    </div>
+                    
 
                     <table class="w-full text-sm border mt-3">
-                      <tbody>
-                        <tr><td class="px-2 py-1">a. Profit 20%</td><td class="px-2 py-1 text-right">{{ formatCurrency(profit) }}</td></tr>
-                        <tr><td class="px-2 py-1">b. Fee Kantor 20%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeKantor) }}</td></tr>
-                        <tr><td class="px-2 py-1">c. Fee Staf 2%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeStaf) }}</td></tr>
-                        <tr><td class="px-2 py-1">d. Fee Konsultan 3%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeKonsultan) }}</td></tr>
-                        <tr><td class="px-2 py-1">e. Fee Bendera 3%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeBendera) }}</td></tr>
-                        <tr><td class="px-2 py-1">f. Fee Marketing 2%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeMarketing) }}</td></tr>
-                        <tr><td class="px-2 py-1">g. PPh 2.65%</td><td class="px-2 py-1 text-right">{{ formatCurrency(pph) }}</td></tr>
-                        <tr><td class="px-2 py-1">h. PPN 11%</td><td class="px-2 py-1 text-right">{{ formatCurrency(ppn) }}</td></tr>
-                      </tbody>
-                      <tfoot>
-                        <tr class="font-bold border-t bg-gray-100">
-                          <td class="px-2 py-2 text-right  font-semibold text-lg">TOTAL AKHIR (Grand Total)</td>
-                          <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
-                            {{ formatCurrency(grandTotalFinal) }}
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
+                    <tbody>
+                      <tr class="font-bold border-t bg-gray-100">
+                        <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AWAL</td>
+                        <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
+                          {{ formatCurrency(grandTotal) }}
+                        </td>
+                      </tr>
+                      <tr><td class="px-2 py-2 border">a. Profit 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(profit) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">b. Fee Kantor 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKantor) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">c. Fee Staf 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeStaf) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">d. Fee Konsultan 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKonsultan) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">e. Fee Bendera 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeBendera) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">f. Fee Marketing 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeMarketing) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">g. PPh 2.65%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(pph) }}</td></tr>
+                      <tr><td class="px-2 py-2 border">h. PPN 11%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(ppn) }}</td></tr>
+                      <tr class="font-bold border-t bg-gray-100">
+                        <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AKHIR (Grand Total)</td>
+                        <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
+                          {{ formatCurrency(grandTotalFinal) }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  
+                      
+                  
+                  </table>
+
+
                   </div>
                 </div>
 
@@ -1115,7 +1147,11 @@ const downloadRABPDF = async () => {
             </div>
           </div>
         </div>
-          <div v-if="selectedTab === 2">
+
+
+        <!-- RAB 3 -->
+
+        <div v-if="selectedTab === 2">
              <div class="alert bg-green-100 w-full mb-5 p-3 rounded" role="alert">
                 <h4 class="font-bold mb-2">
                   List Project Pengerjaan
@@ -1129,79 +1165,89 @@ const downloadRABPDF = async () => {
             </div>
             <div v-if="selectedProject">
 
-           <button
-                  v-if="selectedProject.rab === 3"
-                  class="btn bg-green-500 p-2 text-white ml-2 mb-4 cursor-pointer w-full float-end"
-                  @click="downloadRABPDF"
-                >
-                  <i class="fa-solid fa-download"></i> Download RAB Final
-                </button>
+            <div v-if="selectedProject.rab !== 1 && selectedProject.rab !== 2 && selectedProject.rab !== 3">
+                  <button
+                      v-if="selectedProject.rab === 3"
+                      class="btn bg-green-500 p-2 text-white ml-2 mb-4 cursor-pointer w-full float-end"
+                      @click="downloadRABPDF"
+                    >
+                      <i class="fa-solid fa-download"></i> Download RAB Final
+                  </button>
 
-            <div class="p-0">
+                <div class="p-0">
 
 
-                  <table
-                    class="w-full border-collapse border text-sm"
-                    v-for="value in projectPekerjaan"
-                    :key="value.pekerjaan_id"
-                  >
-                    <tbody>
-                      <tr style="background-color: antiquewhite;">
-                        <td colspan="6" class="border px-2 py-1 text-left font-bold">
-                          {{ value.pekerjaan_name }}
-                        </td>
-        
-                      </tr>
-
-                      <!-- DETAIL ITEM -->
-                      <tr
-                        v-for="dtl in value.detail.filter(d => d.pekerjaan_id === value.pekerjaan_id)"
-                        :key="dtl.id"
+                      <table
+                        class="w-full border-collapse border text-sm"
+                        v-for="value in projectPekerjaan"
+                        :key="value.pekerjaan_id"
                       >
-                        <td colspan="2" class="border px-2 py-2">{{ dtl.tambahan }}</td>
-                        <td class="border px-2 py-2 text-center w-[150px]">{{ dtl.satuan }}</td>
-                        <td class="border px-2 py-2 text-center w-[150px]">
-                          {{ formatCurrency(dtl.total_estimasi_price) }}
-                        </td>
-                        <td class="border px-2 py-2 text-center w-[150px]">
-                          {{ dtl.total_jumlah }}
-                        </td>
-                        <td class="border px-2 py-2 text-right" colspan="2">
-                          {{ formatCurrency(dtl.total_estimasi_price * dtl.total_jumlah) }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                        <tbody>
+                          <tr style="background-color: antiquewhite;">
+                            <td colspan="6" class="border px-2 py-1 text-left font-bold">
+                              {{ value.pekerjaan_name }}
+                            </td>
+            
+                          </tr>
 
-                  <!-- TOTAL DAN RINCIAN -->
-                  <div v-if="projectPekerjaan && projectPekerjaan.length > 0" class="mt-6 border-t pt-4">
-                    <div class="text-right font-semibold text-lg mb-2">
-                      Total Awal:
-                      <span class="text-blue-600">{{ formatCurrency(grandTotal) }}</span>
-                    </div>
+                          <!-- DETAIL ITEM -->
+                          <tr
+                            v-for="dtl in value.detail.filter(d => d.pekerjaan_id === value.pekerjaan_id)"
+                            :key="dtl.id"
+                          >
+                            <td colspan="2" class="border px-2 py-2">{{ dtl.tambahan }}</td>
+                            <td class="border px-2 py-2 text-center w-[150px]">{{ dtl.satuan }}</td>
+                            <td class="border px-2 py-2 text-center w-[150px]">
+                              {{ formatCurrency(dtl.total_estimasi_price) }}
+                            </td>
+                            <td class="border px-2 py-2 text-center w-[150px]">
+                              {{ dtl.total_jumlah }}
+                            </td>
+                            <td class="border px-2 py-2 text-right" colspan="2">
+                              {{ formatCurrency(dtl.total_estimasi_price * dtl.total_jumlah) }}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
 
-                    <table class="w-full text-sm border mt-3">
-                      <tbody>
-                        <tr><td class="px-2 py-1">a. Profit 20%</td><td class="px-2 py-1 text-right">{{ formatCurrency(profit) }}</td></tr>
-                        <tr><td class="px-2 py-1">b. Fee Kantor 20%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeKantor) }}</td></tr>
-                        <tr><td class="px-2 py-1">c. Fee Staf 2%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeStaf) }}</td></tr>
-                        <tr><td class="px-2 py-1">d. Fee Konsultan 3%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeKonsultan) }}</td></tr>
-                        <tr><td class="px-2 py-1">e. Fee Bendera 3%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeBendera) }}</td></tr>
-                        <tr><td class="px-2 py-1">f. Fee Marketing 2%</td><td class="px-2 py-1 text-right">{{ formatCurrency(feeMarketing) }}</td></tr>
-                        <tr><td class="px-2 py-1">g. PPh 2.65%</td><td class="px-2 py-1 text-right">{{ formatCurrency(pph) }}</td></tr>
-                        <tr><td class="px-2 py-1">h. PPN 11%</td><td class="px-2 py-1 text-right">{{ formatCurrency(ppn) }}</td></tr>
-                      </tbody>
-                      <tfoot>
-                        <tr class="font-bold border-t bg-gray-100">
-                          <td class="px-2 py-2 text-right  font-semibold text-lg">TOTAL AKHIR (Grand Total)</td>
-                          <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
-                            {{ formatCurrency(grandTotalFinal) }}
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
+                      <!-- TOTAL DAN RINCIAN -->
+                      <div v-if="projectPekerjaan && projectPekerjaan.length > 0" class="mt-6 border-t pt-4">
+                        
+
+                        <table class="w-full text-sm border mt-3">
+                        <tbody>
+                          <tr class="font-bold border-t bg-gray-100">
+                            <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AWAL</td>
+                            <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
+                              {{ formatCurrency(grandTotal) }}
+                            </td>
+                          </tr>
+                          <tr><td class="px-2 py-2 border">a. Profit 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(profit) }}</td></tr>
+                          <tr><td class="px-2 py-2 border">b. Fee Kantor 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKantor) }}</td></tr>
+                          <tr><td class="px-2 py-2 border">c. Fee Staf 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeStaf) }}</td></tr>
+                          <tr><td class="px-2 py-2 border">d. Fee Konsultan 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKonsultan) }}</td></tr>
+                          <tr><td class="px-2 py-2 border">e. Fee Bendera 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeBendera) }}</td></tr>
+                          <tr><td class="px-2 py-2 border">f. Fee Marketing 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeMarketing) }}</td></tr>
+                          <tr><td class="px-2 py-2 border">g. PPh 2.65%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(pph) }}</td></tr>
+                          <tr><td class="px-2 py-2 border">h. PPN 11%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(ppn) }}</td></tr>
+                          <tr class="font-bold border-t bg-gray-100">
+                            <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AKHIR (Grand Total)</td>
+                            <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
+                              {{ formatCurrency(grandTotalFinal) }}
+                            </td>
+                          </tr>
+                        </tbody>
+                      
+                          
+                      
+                      </table>
+
+
+                      </div>
                 </div>
+
+            </div>
+
           </div>
         </div>
       </div>

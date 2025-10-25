@@ -13,6 +13,8 @@ interface Supplier {
     telp: string;
     address: string;
     pic: string;
+    email: string;
+    password:string;
 }
 
 
@@ -26,6 +28,8 @@ const form = useForm({
     telp: props.supplier.telp,
     pic: props.supplier.pic,
     address: props.supplier.address,
+    email:props.supplier.email,
+    password:""
 });
 
 // this function is going to handle the user information submit.
@@ -54,7 +58,7 @@ const handleInput = () => {
                 </div>
                 <div class="space-y-2">
                     <Label for="telp">Telp</Label>
-                    <Input v-model="form.telp" id="telp" type="number" placeholder="" />
+                    <Input v-model="form.telp" id="telp" type="text" placeholder="" />
                     <div class="text-sm text-red-600" v-if="form.errors.telp">{{ form.errors.telp }}</div>
                 </div>
 
@@ -68,6 +72,19 @@ const handleInput = () => {
                     <Label for="address">Address</Label>
                     <Input v-model="form.address" id="address" type="text" placeholder="" />
                     <div class="text-sm text-red-600" v-if="form.errors.address">{{ form.errors.address }}</div>
+                </div>
+
+
+                 <div class="space-y-2">
+                    <Label for="telp">Email</Label>
+                    <Input v-model="form.email" id="email" type="text" placeholder="" />
+                    <div class="text-sm text-red-600" v-if="form.errors.email">{{ form.errors.email }}</div>
+                </div>
+
+                 <div class="space-y-2">
+                    <Label for="telp">Password</Label>
+                    <Input v-model="form.password" id="password" type="password" placeholder="" />
+                    <div class="text-sm text-red-600" v-if="form.errors.password">{{ form.errors.password }}</div>
                 </div>
                 
 

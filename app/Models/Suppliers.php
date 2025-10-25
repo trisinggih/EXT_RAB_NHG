@@ -15,6 +15,8 @@ class Suppliers extends Authenticatable
         'name',
         'address',
         'telp',
-        'pic'
+        'pic',
+        'email',
+        'password'
     ];
 }

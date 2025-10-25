@@ -311,7 +311,7 @@ const handleNumberInput = (row, key, event) => {
     <div class="p-4 mb-3">
       <div class="grid grid-cols-5 gap-4 mb-4">
         <!-- Upload -->
-        <div class="col-span-4 mb-4" v-if="!imageId">
+        <div class="col-span-5 mb-4" v-if="!imageId">
           <form @submit.prevent="handleSubmit" class="flex gap-2 items-center">
             <input
               id="image"
@@ -325,9 +325,7 @@ const handleNumberInput = (row, key, event) => {
             </button>
           </form>
         </div>
-
-        <!-- Canvas -->
-        <div class="col-span-4 max-w-[810px]" v-if="imageId && imagePath">
+        <div class="col-span-5 max-w-[810px] mx-auto" v-if="imageId && imagePath">
           <canvas
             ref="canvasRef"
             width="800"
@@ -335,23 +333,6 @@ const handleNumberInput = (row, key, event) => {
             class="border border-black"
             @click="handleClick"
           ></canvas>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-start-5 w-full text-right">
-          <h2 class="font-semibold mb-2">Daftar Penandaan</h2>
-          <ul>
-            <li v-for="(m, idx) in marks" :key="idx" class="text-sm mb-1 flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-red-500"></span>
-              {{ m.label }} (x: {{ m.x }}, y: {{ m.y }})
-            </li>
-          </ul>
-
-          <hr class="my-4 border-dotted" />
-
-          <p class="text-red-600 text-lg w-full">
-            Pastikan anda mengisi data informasi pada tabel di bawah ini. guna sebagai bill of material produksi.
-          </p>
         </div>
       </div>
     </div>

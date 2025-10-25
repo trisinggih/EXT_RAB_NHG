@@ -4,8 +4,15 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu,  SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import {  FileBadge, Folder, HandCoins, LayoutGrid, MonitorCog,  Settings, } from 'lucide-vue-next';
+import {  FileBadge, Folder, HandCoins, LayoutGrid, MonitorCog,  Settings, Menu, X } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+import { ref } from "vue";
+
+const isCollapsed = ref(false);
+
+function toggleSidebar() {
+  isCollapsed.value = !isCollapsed.value;
+}
 
 const mainNavItems: NavItem[] = [
     {
@@ -86,27 +93,58 @@ const mainNavItems: NavItem[] = [
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="inset">
-        <SidebarHeader>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                        <Link :href="route('dashboard')">
-                            <div class="mb-1 flex w-[100px] items-center justify-center rounded-md">
-                                <AppLogo class=" fill-current" />
-                            </div>
-                        </Link>
-                    
-                </SidebarMenuItem>
-            </SidebarMenu>
-        </SidebarHeader>
+  <div :class="[
+        'flex',
+        isCollapsed ? 'w-[80px]' : 'w-[260px]'
+      ]">
+    <!-- Tombol show/hide -->
+    <button
+      @click="toggleSidebar"
+      :class="[
+        'absolute top-4 z-50 bg-primary-500 text-black p-2 rounded-md hover:bg-primary-600 transition-all',
+        isCollapsed ? 'left-[80px]' : 'left-[200px]'
+      ]"
+    >
+      <component :is="isCollapsed ? X : Menu" class="w-5 h-5" />
+    </button>
 
-        <SidebarContent>
-            <NavMain :items="mainNavItems" />
-        </SidebarContent>
+    <!-- Sidebar -->
+    <Sidebar
+      :class="[
+        'transition-all duration-300',
+        isCollapsed ? 'w-[80px]' : 'w-[260px]'
+      ]"
+      collapsible="icon"
+      variant="inset"
+    >
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Link :href="route('dashboard')">
+              <div
+                class="mb-1 flex items-center justify-center rounded-md"
+                :class="[isCollapsed ? 'w-[50px]' : 'w-[100px]']"
+              >
+                <AppLogo class="fill-current" />
+              </div>
+            </Link>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
 
-        <SidebarFooter>
-            <NavUser />
-        </SidebarFooter>
+      <SidebarContent>
+        <NavMain :items="mainNavItems" :is-collapsed="isCollapsed" />
+      </SidebarContent>
+
+      <SidebarFooter>
+        <NavUser />
+      </SidebarFooter>
     </Sidebar>
-    <slot />
+
+    <!-- Konten utama -->
+    <div class="flex-1 p-5 transition-all duration-300" :class="{ 'ml-[0px]': isCollapsed, 'ml-[0px]': !isCollapsed }">
+      <slot />
+    </div>
+  </div>
 </template>
+

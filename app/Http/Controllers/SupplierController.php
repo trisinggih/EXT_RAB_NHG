@@ -33,6 +33,8 @@ class SupplierController extends Controller
             'telp' => 'required|max:20',
             'address' => 'required|string|max:255',
             'pic' => 'required|string|max:255',
+            'email' => 'required|string|max:255',
+            'password' => 'required|string|max:255',
         ]);
         Suppliers::create($data);
         return redirect()->route('suppliers.index')->with('message', 'Suppliers created successfully.');
@@ -132,10 +134,25 @@ class SupplierController extends Controller
             'telp' => 'required|max:20',
             'address' => 'required|string|max:255',
             'pic' => 'required|string|max:255',
+            'email' => 'required|string|max:255',
+            'password' => 'nullable|string|min:6', // tambahkan validasi opsional
         ]);
+
+        // Jika ada password di request, hash dan tambahkan ke data
+        if (!empty($data['password'])) {
+            $data['password'] = bcrypt($data['password']);
+        } else {
+            // Hapus password dari array supaya tidak menimpa field lama
+            unset($data['password']);
+        }
+
         $supplier->update($data);
-        return redirect()->route('suppliers.index')->with('message', 'Supplier updated successfully.');
+
+        return redirect()
+            ->route('suppliers.index')
+            ->with('message', 'Supplier updated successfully.');
     }
+
 
     public function destroy(Suppliers $supplier): RedirectResponse
     {
