@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\ProjectGambar;
+use App\Models\ProjectDetail;
+
 use App\Models\Clients;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -55,6 +58,18 @@ class ProjectController extends Controller
         ]);
     }
 
+    public function upload($projects): Response
+    {
+        $clients = Clients::get();
+        $projects = Project::find($projects);
+        $projectGambar = ProjectGambar::where('project_id', $projects['id'])->get();
+        return Inertia::render('project/Upload', [
+            'projects' => $projects,
+            'clients' => $clients,
+            'projectGambar' => $projectGambar,
+        ]);
+    }
+
     public function update(Request $request, Project $project ): RedirectResponse
     {
         $data = $request->validate([
@@ -67,6 +82,32 @@ class ProjectController extends Controller
         $project->update($data);
         return redirect()->route('projects.index')->with('message', 'Project updated successfully.');
     }
+
+
+    public function updateSupplier(Request $request)
+    {
+        $request->validate([
+            'project_id' => 'required',
+            'product_id' => 'required',
+            'pekerjaan_id' => 'required',
+            'material_id' => 'required',
+            'supplier_id' => 'required',
+            'estimasi_price' => 'required',
+        ]);
+
+        ProjectDetail::where('project_id', $request->project_id)
+            ->where('product_id', $request->product_id)
+            // ->where('pekerjaan_id', $request->pekerjaan_id)
+            ->where('material_id', $request->material_id)
+            ->update([
+                'supplier_id' => $request->supplier_id,
+                'estimasi_price' => $request->estimasi_price,
+            ]);
+
+        return back()->with('success', 'Supplier dan estimasi harga berhasil diperbarui.');
+    }
+
+
 
     public function destroy(Project $project): RedirectResponse
     {

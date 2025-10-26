@@ -70,7 +70,6 @@ const settingweb = computed(() => props.settingweb)
               <th class="px-4 py-3 border-b border-gray-200 text-left">Name</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Client</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Description</th>
-              <th class="px-4 py-3 border-b border-gray-200 text-left w-[170px]">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -84,13 +83,7 @@ const settingweb = computed(() => props.settingweb)
               </td>
               <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.client_name }}</td>
               <td class="px-4 py-3 border-b border-gray-200">{{ u.description ?? '-' }}</td>
-              <td class="px-4 py-3 border-b border-gray-200">
-                <div class="flex gap-1">
-                    <Button class="bg-green-500 text-white p-2 rounded cursor-pointer">
-                      Download RAB
-                    </Button>
-                </div>
-              </td>
+           
             </tr>
 
           </tbody>

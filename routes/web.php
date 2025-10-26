@@ -17,7 +17,10 @@ use App\Http\Controllers\AnnotationController;
 use App\Http\Controllers\BomController;
 use App\Http\Controllers\ProductPekerjaanController;
 use App\Http\Controllers\ProjectProductController;
+use App\Http\Controllers\RABController;
+use App\Http\Controllers\RABExportController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProjectGambarController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Mail;
@@ -27,6 +30,21 @@ Route::get('/', [FrontHomeController::class, 'Index'])->name('home');
 Route::get('/blog', [FrontHomeController::class, 'Blog'])->name('blog');
 
 Route::get('/allprojects', [FrontHomeController::class, 'Project'])->name('allproject');
+
+// routes/web.php
+Route::post('/rab/pdf', [RABController::class, 'generatePDF'])->name('rab.pdf');
+Route::post('/rab/excel', [RABExportController::class, 'export'])->name('rab.export.excel');
+
+Route::post('/project-gambar', [ProjectGambarController::class, 'store'])
+    ->name('project-gambar.store');
+
+
+Route::delete('/project-gambar/{id}', [ProjectGambarController::class, 'destroy'])
+    ->name('project-gambar.destroy');
+
+Route::put('/projectdetail/update-supplier', [ProjectController::class, 'updateSupplier'])
+    ->name('projectdetail.updateSupplier');
+
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
@@ -144,6 +162,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('projects/create', [ProjectController::class, 'Create'])->name('projects.create');
     Route::post('projects', [ProjectController::class, 'Store'])->name('projects.store');
     Route::get('projects/{project}/edit', [ProjectController::class, 'Edit'])->name('projects.edit');
+    Route::get('projects/{project}/upload', [ProjectController::class, 'Upload'])->name('projects.upload');
     Route::put('projects/{project}', [ProjectController::class, 'Update'])->name('projects.update');
     Route::delete('projects/{project}', [ProjectController::class, 'Destroy'])->name('projects.destroy');
 

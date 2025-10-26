@@ -242,54 +242,98 @@ const getMaterialById = (id: string | number) => {
 
 
 const saveRow = (row: any) => {
-  router.post('/bommaterial/create', {
-    product_id: props.product.id,
-    material_id: row.materialId,
-    mark_id: row.mark_id,
-    jumlah: row.jumlah,
-    panjang: row.panjang,
-    lebar: row.lebar,
-    tinggi: row.tinggi,
-    satuan: row.satuan,
-    estimasi_price: 0,
-    keterangan: row.keterangan,
-  });
+  router.post(
+    '/bommaterial/create',
+    {
+      product_id: props.product.id,
+      material_id: row.materialId,
+      mark_id: row.mark_id,
+      jumlah: row.jumlah,
+      panjang: row.panjang,
+      lebar: row.lebar,
+      tinggi: row.tinggi,
+      satuan: row.satuan,
+      estimasi_price: 0,
+      keterangan: row.keterangan,
+    },
+    {
+      onSuccess: () => {
+        router.visit(window.location.pathname, { replace: true })
+      },
+      onError: (errors) => {
+        console.error('Validation error:', errors)
+      },
+    }
+  )
+}
 
-  router.visit(window.location.pathname, { replace: true });
-
-
-};
 
 
 
 const deleteRow = (row: any) => {
-  router.post(`/bommaterialdelete`,{
-     product_id: props.product.id,
-     material_id: row.materialId,
-     mark_id: row.mark_id,
-  });
-  marks.value.splice(rows.value.indexOf(row), 1);
+  if (!confirm('Yakin ingin menghapus data ini?')) {
+    return; // jika user batalkan
+  }
+
+  router.post(
+    '/bommaterialdelete',
+    {
+      product_id: props.product.id,
+      material_id: row.materialId,
+      mark_id: row.mark_id,
+    },
+    {
+      onStart: () => {
+        console.log('Menghapus data...');
+      },
+      onSuccess: () => {
+        // Hapus dari array lokal agar UI langsung update
+        marks.value.splice(marks.value.indexOf(row), 1);
+
+        // Reload halaman agar data sinkron dari server
+        router.visit(window.location.pathname, { replace: true });
+
+        alert('Data berhasil dihapus.');
+      },
+      onError: (errors) => {
+        console.error('Gagal menghapus BOM:', errors);
+        alert('Gagal menghapus data. Silakan coba lagi.');
+      },
+    }
+  );
 };
+
 
 
 
 const formatNumber = (value) => {
   if (value === null || value === undefined || value === '') return ''
-  return new Intl.NumberFormat('id-ID').format(value)
+  return new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(value)
 }
 
-// Fungsi parsing string jadi angka murni
-const parseNumber = (value) => Number(value.replace(/\D/g, '') || 0)
+const parseNumber = (value) => {
+  if (!value) return 0
+  // ganti koma jadi titik agar parseFloat paham
+  const normalized = value.replace(',', '.')
+  // hanya boleh angka dan satu titik
+  const cleaned = normalized.replace(/[^0-9.]/g, '')
+  return parseFloat(cleaned) || 0
+}
 
-// Format otomatis untuk semua input angka
+// hanya simpan nilai numeric, tapi JANGAN format saat mengetik
 const handleNumberInput = (row, key, event) => {
   const val = event.target.value
   const numeric = parseNumber(val)
   row[key] = numeric
-  event.target.value = formatNumber(numeric)
 }
 
-
+// format hanya ketika selesai mengetik (blur)
+const handleNumberBlur = (row, key, event) => {
+  event.target.value = formatNumber(row[key])
+}
 
 </script>
 
@@ -303,7 +347,7 @@ const handleNumberInput = (row, key, event) => {
         <p class="text-white mt-1 text-sm font-normal">
           Perhitungan estimasi pekerjaan
           <b>{{ props.product.name }}</b>
-          <h5 class="float-right font-bold">Rp.{{ props.product.price }}</h5>
+
         </p>
       </h1>
     </div>
@@ -376,29 +420,45 @@ const handleNumberInput = (row, key, event) => {
               <input class="border border-gray-200 p-2 w-[100px]" type="text" v-model="m.satuan" disabled />
             </td>
 
+<td class="border-b border-gray-200">
+  <input
+    :value="formatNumber(m.jumlah)"
+    @input="handleNumberInput(m, 'jumlah', $event)"
+    @blur="handleNumberBlur(m, 'jumlah', $event)"
+    type="text"
+    inputmode="decimal"
+    class="border border-gray-200 p-2 w-[100px] text-right"
+  />
+</td>
+              <td class="border-b border-gray-200">
+                <input
+                  :value="formatNumber(m.panjang)"
+                  @input="handleNumberInput(m, 'panjang', $event)"
+                  @blur="handleNumberBlur(m, 'panjang', $event)"
+                  type="text"
+                  inputmode="decimal"
+                  class="border border-gray-200 p-2 w-[100px] text-right"
+                />
+              </td>
+              <td class="border-b border-gray-200">
+                <input
+                  :value="formatNumber(m.lebar)"
+                  @input="handleNumberInput(m, 'lebar', $event)"
+                  @blur="handleNumberBlur(m, 'lebar', $event)"
+                  type="text"
+                  inputmode="decimal"
+                  class="border border-gray-200 p-2 w-[100px] text-right"
+                />
+              </td>
             <td class="border-b border-gray-200">
-              <input 
-              :value="formatNumber(m.jumlah)"
-              @input="handleNumberInput(m, 'jumlah', $event)"
-              type="number" class="border border-gray-200 p-2 w-[100px]" />
-            </td>
-            <td class=" border-b border-gray-200">
-              <input  
-              :value="formatNumber(m.panjang)"
-              @input="handleNumberInput(m, 'panjang', $event)"
-              type="number" class="border border-gray-200 p-2 w-[100px]" />
-            </td>
-            <td class="border-b border-gray-200">
-              <input 
-              :value="formatNumber(m.lebar)"
-              @input="handleNumberInput(m, 'lebar', $event)"
-              type="number" class="border border-gray-200 p-2 w-[100px]" />
-            </td>
-            <td class="border-b border-gray-200">
-              <input 
-              :value="formatNumber(m.tinggi)"
-              @input="handleNumberInput(m, 'tinggi', $event)"
-              type="number" class="border border-gray-200 p-2 w-[100px]" />
+              <input
+                :value="formatNumber(m.tinggi)"
+                @input="handleNumberInput(m, 'tinggi', $event)"
+                @blur="handleNumberBlur(m, 'tinggi', $event)"
+                type="text"
+                inputmode="decimal"
+                class="border border-gray-200 p-2 w-[100px] text-right"
+              />
             </td>
 
             <td class="border-b border-gray-200">

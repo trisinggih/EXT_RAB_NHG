@@ -6,7 +6,11 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import {  FileBadge, Folder, HandCoins, LayoutGrid, MonitorCog,  Settings, Menu, X } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-import { ref } from "vue";
+import { ref,computed } from "vue";
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage()
+const user = page.props.auth.user as { role_id: number }
 
 const isCollapsed = ref(false);
 
@@ -14,81 +18,107 @@ function toggleSidebar() {
   isCollapsed.value = !isCollapsed.value;
 }
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Master Data',
-        href: '#',
-        icon: Settings,
-        children: [
-            {
-                title: 'Users',
-                href: '/users',
-            },
-            {
-                title: 'Roles',
-                href: '/roles',
-            },
-             {
-                title: 'Clients',
-                href: '/clients',
-            },
-            {
-                title: 'Material',
-                href: '/materials',
-            },
-             {
-                title: 'Suppliers',
-                href: '/suppliers',
-            },
-        ],  
-    },
-    {
-        title: 'Front',
-        href: '#',
-        icon: MonitorCog,
-        children: [
-            {
-                title: 'Banners',
-                href: '/banners',
-            },
-            {
-                title: 'Blogs',
-                href: '/blogs',
-            }
-        ],  
-    },
-    {
-        title: 'Referensi',
-        href: '#',
-        icon: Folder,
-        children: [
-            {
-                title: 'Pekerjaan',
-                href: '/pekerjaan',
-            },
-            {
-                title: 'Production',
-                href: '/bom',
-            },
-        ],  
-    },
-    {
-        title: 'Projects',
-        href: '/projects',
-        icon: FileBadge ,
-    },
-    {
-        title: 'Anggaran',
-        href: '/anggaran',
-        icon: HandCoins ,
-    },
-];
 
+
+const adminNavItems: NavItem[] = [
+  {
+    title: 'Dashboard',
+    href: '/dashboard',
+    icon: LayoutGrid,
+  },
+  {
+    title: 'Master Data',
+    href: '#',
+    icon: Settings,
+    children: [
+      { title: 'Users', href: '/users' },
+      { title: 'Roles', href: '/roles' },
+      { title: 'Clients', href: '/clients' },
+      { title: 'Material', href: '/materials' },
+      { title: 'Suppliers', href: '/suppliers' },
+    ],
+  },
+  {
+    title: 'Front',
+    href: '#',
+    icon: MonitorCog,
+    children: [
+      { title: 'Banners', href: '/banners' },
+      { title: 'Blogs', href: '/blogs' },
+    ],
+  },
+  {
+    title: 'Referensi',
+    href: '#',
+    icon: Folder,
+    children: [
+      { title: 'Pekerjaan', href: '/pekerjaan' },
+      { title: 'Production', href: '/bom' },
+    ],
+  },
+  {
+    title: 'Projects',
+    href: '/projects',
+    icon: FileBadge,
+  },
+  {
+    title: 'Anggaran',
+    href: '/anggaran',
+    icon: HandCoins,
+  },
+]
+
+// definisi menu untuk user biasa (misal role != 1)
+const userNavItems: NavItem[] = [
+  {
+    title: 'Dashboard',
+    href: '/dashboard',
+    icon: LayoutGrid,
+  },
+ {
+    title: 'Referensi',
+    href: '#',
+    icon: Folder,
+    children: [
+      { title: 'Pekerjaan', href: '/pekerjaan' },
+      { title: 'Production', href: '/bom' },
+    ],
+  },
+  {
+    title: 'Projects',
+    href: '/projects',
+    icon: FileBadge,
+  },
+  {
+    title: 'Anggaran',
+    href: '/anggaran',
+    icon: HandCoins,
+  },
+]
+
+const engineerrNavItems: NavItem[] = [
+  {
+    title: 'Dashboard',
+    href: '/dashboard',
+    icon: LayoutGrid,
+  },
+  {
+    title: 'Projects',
+    href: '/projects',
+    icon: FileBadge,
+  },
+]
+
+
+const mainNavItems = computed<NavItem[]>(() => {
+  if (user.role_id == 1) {
+    return adminNavItems
+  } else if (user.role_id == 10) {
+    return engineerrNavItems
+  } else {
+    return userNavItems
+  }
+})
 
 </script>
 

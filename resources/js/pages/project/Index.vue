@@ -4,7 +4,10 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { ref, computed, watch } from 'vue';
 import { type BreadcrumbItem } from '@/types';
+import { usePage } from '@inertiajs/vue3';
 
+const hal = usePage()
+const user = hal.props.auth.user as { role_id: number }
 
 interface Project {
   id: number;
@@ -183,23 +186,36 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
               <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.client_name }}</td>
               <td class="px-4 py-3 border-b border-gray-200">{{ u.description ?? '-' }}</td>
               <td class="px-4 py-3 border-b border-gray-200">
-                <div class="flex gap-1">
-                  <Link :href="route('projects.edit', { id: u.id })">
-                    <Button class="bg-yellow-500 text-white">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
-                        <path
-                          d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
-                        />
-                      </svg>
-                    </Button>
-                  </Link>
-                  <Button class="bg-red-600 text-white" @click="handleProjectDeletion(u.id)">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
-                      <path d="M6 7h12v2H6zm2 3h8v9H8zm3-6h2v2h-2z" />
-                    </svg>
-                  </Button>
-                </div>
-              </td>
+  <div class="flex gap-1">
+
+    <!-- Tampilkan tombol hanya jika role_id = 1 -->
+    
+      <Link :href="route('projects.upload', { id: u.id })">
+        <Button class="bg-green-500 text-white">
+          Upload Foto
+        </Button>
+      </Link>
+<template v-if="user.role_id === 1">
+      <Link :href="route('projects.edit', { id: u.id })">
+        <Button class="bg-yellow-500 text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
+            <path
+              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
+            />
+          </svg>
+        </Button>
+      </Link>
+
+      <Button class="bg-red-600 text-white" @click="handleProjectDeletion(u.id)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
+          <path d="M6 7h12v2H6zm2 3h8v9H8zm3-6h2v2h-2z" />
+        </svg>
+      </Button>
+    </template>
+
+  </div>
+</td>
+
             </tr>
             <tr v-if="pageItems.length === 0">
               <td colspan="6" class="px-4 py-10 text-center text-gray-400">Tidak ada data yang cocok.</td>

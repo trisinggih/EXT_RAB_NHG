@@ -21,7 +21,8 @@ class Bom extends Model
         'panjang',
         'lebar',
         'tinggi',
-        'estimasi_price'
+        'estimasi_price',
+        'keterangan'
     ];
 
 

@@ -75,56 +75,69 @@ class AnggaranController extends Controller
 SELECT DISTINCT 
     a.project_id, 
     a.pekerjaan_id, 
+		a.product_id,
+		c.name as product_name,
     b.name AS pekerjaan_name,
     (
         SELECT JSON_ARRAYAGG(
                    JSON_OBJECT(
                         'id', t.id,
                         'type', t.type,
+												'product_id', t.product_id,
                        'pekerjaan_id', t.pekerjaan_id,
                        'material_id', t.material_id,
                        'tambahan', t.tambahan,
                        'total_jumlah', t.total_jumlah,
                        'total_estimasi_price', t.total_estimasi_price,
-                       'satuan', t.satuan
+                       'satuan', t.satuan,
+											 'supplier_name', t.supplier_name
                    )
                )
         FROM (
             SELECT 
                 d.id,
                 'bom' as type,
+								d.product_id,
                 x.pekerjaan_id,
                 d.tambahan,
                 d.material_id,
                 SUM(d.jumlah) AS total_jumlah,
                 SUM(d.estimasi_price) AS total_estimasi_price,
-                MAX(d.satuan) AS satuan
+                MAX(d.satuan) AS satuan,
+								xc.`name` as supplier_name
             FROM project_detail d
             JOIN product_pekerjaan x ON d.pekerjaan_id = x.id
             JOIN pekerjaan w ON x.pekerjaan_id = w.id
+						LEFT JOIN supplier xc on xc.id = d.supplier_id
             WHERE d.project_id = a.project_id
-            GROUP BY x.pekerjaan_id, d.tambahan, d.material_id, d.id
+						and d.product_id=a.product_id
+            GROUP BY d.product_id, x.pekerjaan_id, d.tambahan, d.material_id, d.id
 
             UNION ALL
 
             SELECT 
                 d.id,
                 'tambahan' as type,
+								d.project_id,
                 d.pekerjaan_id,
                 d.tambahan,
                 null as material_id,
                 SUM(d.jumlah) AS total_jumlah,
                 SUM(d.estimasi_price) AS total_estimasi_price,
-                MAX(d.satuan) AS satuan
+                MAX(d.satuan) AS satuan,
+								xc.`name` as supplier_name
             FROM project_detail_tambahan d
             JOIN pekerjaan w ON d.pekerjaan_id = w.id
+						LEFT JOIN supplier xc on xc.id = d.supplier_id
             WHERE d.project_id = a.project_id
-            GROUP BY d.pekerjaan_id, d.tambahan, d.id
+						and d.product_id=a.product_id
+            GROUP BY d.product_id, d.pekerjaan_id, d.tambahan, d.id
         ) t
         WHERE t.pekerjaan_id = a.pekerjaan_id
     ) AS detail
 FROM project_pekerjaan AS a 
 JOIN pekerjaan AS b ON a.pekerjaan_id = b.id
+Join products as c on a.product_id=c.id
             WHERE a.project_id = ?
         ", [$id]); 
 
@@ -138,6 +151,7 @@ JOIN pekerjaan AS b ON a.pekerjaan_id = b.id
         {
             ProjectDetailTambahan::create([
                 'project_id' => $request->project_id,
+                'product_id' => $request->product_id,
                 'pekerjaan_id' => $request->pekerjaan_id,
                 'tambahan' => $request->tambahan,
                 'satuan' => $request->satuan,
@@ -150,6 +164,7 @@ JOIN pekerjaan AS b ON a.pekerjaan_id = b.id
             {
                 ProjectDetail::where('id', $request->id)->update([
                     'tambahan' => $request->tambahan,
+                    'product_id' => $request->product_id,
                     'satuan' => $request->satuan,
                     'jumlah' => $request->qty,
                     'estimasi_price' => $request->harga,
@@ -157,6 +172,7 @@ JOIN pekerjaan AS b ON a.pekerjaan_id = b.id
             }else{
                 ProjectDetailTambahan::where('id', $request->id)->update([
                     'tambahan' => $request->tambahan,
+                    'product_id' => $request->product_id,
                     'satuan' => $request->satuan,
                     'jumlah' => $request->qty,
                     'estimasi_price' => $request->harga,
