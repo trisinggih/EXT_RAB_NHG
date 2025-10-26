@@ -32,8 +32,8 @@ Route::get('/blog', [FrontHomeController::class, 'Blog'])->name('blog');
 Route::get('/allprojects', [FrontHomeController::class, 'Project'])->name('allproject');
 
 // routes/web.php
-Route::post('/rab/pdf', [RABController::class, 'generatePDF'])->name('rab.pdf');
-Route::post('/rab/excel', [RABExportController::class, 'export'])->name('rab.export.excel');
+Route::get('/rab/pdf', [RABController::class, 'generatePDF'])->name('rab.pdf');
+Route::get('/rab/excel', [RABExportController::class, 'export'])->name('rab.export.excel');
 
 Route::post('/project-gambar', [ProjectGambarController::class, 'store'])
     ->name('project-gambar.store');

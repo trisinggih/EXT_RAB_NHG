@@ -476,79 +476,72 @@ const rabView = ref(null);
 
 
 
+// const downloadRABPDF = (data, product, project) => {
+//   const form = document.createElement('form');
+//   form.method = 'POST';
+//   form.action = '/rab/pdf';
+//   form.target = '_blank';
+
+//   // Ambil CSRF token
+//   const meta = document.querySelector('meta[name="csrf-token"]');
+//   if (!meta) {
+//     alert("CSRF token tidak ditemukan. Pastikan meta[name='csrf-token'] ada di layout.");
+//     return;
+//   }
+
+//   const csrf = meta.getAttribute('content');
+//   const csrfInput = document.createElement('input');
+//   csrfInput.type = 'hidden';
+//   csrfInput.name = '_token';
+//   csrfInput.value = csrf;
+//   form.appendChild(csrfInput);
+
+//   // Tambah payload
+//   const input = document.createElement('input');
+//   input.type = 'hidden';
+//   input.name = 'projectPekerjaan';
+//   input.value = JSON.stringify(data);
+//   form.appendChild(input);
+
+//   const input2 = document.createElement('input');
+//   input2.type = 'hidden';
+//   input2.name = 'product';
+//   input2.value = JSON.stringify(product);
+//   form.appendChild(input2);
+
+//   const input3 = document.createElement('input');
+//   input3.type = 'hidden';
+//   input3.name = 'project';
+//   input3.value = JSON.stringify(project);
+//   form.appendChild(input3);
+
+//   document.body.appendChild(form);
+//   form.submit();
+//   document.body.removeChild(form);
+// };
+
+
 const downloadRABPDF = (data, product, project) => {
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = '/rab/pdf';
-  form.target = '_blank';
+  // Encode semua parameter menjadi URI-safe
+  const params = new URLSearchParams();
+  params.append('projectPekerjaan', encodeURIComponent(JSON.stringify(data)));
+  params.append('product', encodeURIComponent(JSON.stringify(product)));
+  params.append('project', project);
 
-  // Ambil CSRF token
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  if (!meta) {
-    alert("CSRF token tidak ditemukan. Pastikan meta[name='csrf-token'] ada di layout.");
-    return;
-  }
 
-  const csrf = meta.getAttribute('content');
-  const csrfInput = document.createElement('input');
-  csrfInput.type = 'hidden';
-  csrfInput.name = '_token';
-  csrfInput.value = csrf;
-  form.appendChild(csrfInput);
-
-  // Tambah payload
-  const input = document.createElement('input');
-  input.type = 'hidden';
-  input.name = 'projectPekerjaan';
-  input.value = JSON.stringify(data);
-  form.appendChild(input);
-
-  const input2 = document.createElement('input');
-  input2.type = 'hidden';
-  input2.name = 'product';
-  input2.value = JSON.stringify(product);
-  form.appendChild(input2);
-
-  const input3 = document.createElement('input');
-  input3.type = 'hidden';
-  input3.name = 'project';
-  input3.value = JSON.stringify(project);
-  form.appendChild(input3);
-
-  document.body.appendChild(form);
-  form.submit();
-  document.body.removeChild(form);
+  const url = `/rab/pdf?${params.toString()}`;
+  window.open(url, '_blank');
 };
 
 const downloadRABExcel = (data, product) => {
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = '/rab/excel';
-  form.target = '_blank';
+  const params = new URLSearchParams();
+  params.append('projectPekerjaan', encodeURIComponent(JSON.stringify(data)));
+  params.append('projectProduct', encodeURIComponent(JSON.stringify(product)));
 
-  const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-  const tokenInput = document.createElement('input');
-  tokenInput.type = 'hidden';
-  tokenInput.name = '_token';
-  tokenInput.value = csrf;
-  form.appendChild(tokenInput);
-
-  const pekerjaanInput = document.createElement('input');
-  pekerjaanInput.type = 'hidden';
-  pekerjaanInput.name = 'projectPekerjaan';
-  pekerjaanInput.value = JSON.stringify(data);
-  form.appendChild(pekerjaanInput);
-
-  const productInput = document.createElement('input');
-  productInput.type = 'hidden';
-  productInput.name = 'projectProduct';
-  productInput.value = JSON.stringify(product);
-  form.appendChild(productInput);
-
-  document.body.appendChild(form);
-  form.submit();
-  document.body.removeChild(form);
+  const url = `/rab/excel?${params.toString()}`;
+  window.open(url, '_blank');
 };
+
 
 </script>
 

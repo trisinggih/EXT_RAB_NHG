@@ -11,18 +11,19 @@ class RABController extends Controller
 {
     public function generatePDF(Request $request)
     {
-        $projectPekerjaan = json_decode($request->input('projectPekerjaan'), true);
 
-        $projectProduct = json_decode($request->input('product'), true);
+        $projectPekerjaan = json_decode(urldecode($request->query('projectPekerjaan')), true);
+        $projectProduct   = json_decode(urldecode($request->query('product')), true);
+        $projectId        = $request->query('project');
 
-        $project = Project::where('id',$request->project)->first();
 
-        $projectGambar = ProjectGambar::where('project_id',$request->project)->get();
+        $project = Project::where('id', $projectId)->first();
+        $projectGambar = ProjectGambar::where('project_id', $projectId)->get();
 
-        // kirim ke view blade
+        // Render view blade
         $html = view('rab', compact('projectPekerjaan', 'projectProduct', 'project', 'projectGambar'))->render();
 
-        // buat PDF
+        // Buat PDF
         $mpdf = new Mpdf([
             'format' => 'A4',
             'margin_top' => 10,
