@@ -378,24 +378,26 @@ public function export2(Request $request)
                                 $sheet->getColumnDimension('E')->setWidth(15);
                                 $sheet->getColumnDimension('F')->setWidth(18);
 
-                                // Header utama
-                                $sheet->getStyle('A1:F1')->applyFromArray([
-                                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                                    'fill' => [
-                                        'fillType' => Fill::FILL_SOLID,
-                                        'startColor' => ['rgb' => '1F497D']
-                                    ],
-                                    'alignment' => [
-                                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                                        'vertical' => Alignment::VERTICAL_CENTER,
-                                    ],
-                                    'borders' => [
-                                        'allBorders' => [
-                                            'borderStyle' => Border::BORDER_THIN,
-                                            'color' => ['rgb' => '000000']
+                                if($this->index != 3){
+                                    // Header utama
+                                    $sheet->getStyle('A1:F1')->applyFromArray([
+                                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                                        'fill' => [
+                                            'fillType' => Fill::FILL_SOLID,
+                                            'startColor' => ['rgb' => '1F497D']
+                                        ],
+                                        'alignment' => [
+                                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                                            'vertical' => Alignment::VERTICAL_CENTER,
+                                        ],
+                                        'borders' => [
+                                            'allBorders' => [
+                                                'borderStyle' => Border::BORDER_THIN,
+                                                'color' => ['rgb' => '000000']
+                                            ]
                                         ]
-                                    ]
-                                ]);
+                                    ]);
+                                }
 
                                 // Header kedua
                                 // $sheet->getStyle("A{$nextcount}:F{$nextcount}")->applyFromArray([
