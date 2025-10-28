@@ -33,7 +33,9 @@ Route::get('/allprojects', [FrontHomeController::class, 'Project'])->name('allpr
 
 // routes/web.php
 Route::get('/rab/pdf', [RABController::class, 'generatePDF'])->name('rab.pdf');
+Route::get('/rab/pdf2', [RABController::class, 'generatePDFID'])->name('rab.pdf2');
 Route::get('/rab/excel', [RABExportController::class, 'export'])->name('rab.export.excel');
+Route::get('/rab/excel2', [RABExportController::class, 'export2'])->name('rab.export.excel2');
 
 Route::post('/project-gambar', [ProjectGambarController::class, 'store'])
     ->name('project-gambar.store');
@@ -53,6 +55,11 @@ Route::get('dashboard', function () {
 Route::get('supplierdashboard', function () {
     return Inertia::render('DashboardSupplier');
 })->middleware(['auth:supplier'])->name('supplier.dashboard');
+
+
+Route::get('clientdashboard', function () {
+    return Inertia::render('DashboardClient');
+})->middleware(['auth:client'])->name('client.dashboard');
 
 // this will create a group route. Those authorize to access them are authenticated and verified
 // users.
@@ -87,6 +94,21 @@ Route::middleware(['auth:supplier'])
 
     });
 
+
+Route::middleware(['auth:client'])
+    ->prefix('client')
+    ->as('client.')
+    ->group(function () {
+
+        Route::get('dashboard', fn() => Inertia::render('DashboardClient'))
+            ->name('dashboard');
+
+        // Route::get('projects', [MaterialController::class, 'Index'])
+        //     ->name('materials.index');
+
+        Route::get('projects', [ProjectController::class, 'IndexClient'])->name('projects.index');
+
+    });
 
 
 Route::middleware(['auth', 'verified'])->group(function () {

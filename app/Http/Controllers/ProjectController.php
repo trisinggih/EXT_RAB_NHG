@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\ProjectGambar;
 use App\Models\ProjectDetail;
-
+use Illuminate\Support\Facades\Auth;
 use App\Models\Clients;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,6 +22,22 @@ class ProjectController extends Controller
         ->get();
 
         return Inertia::render('project/Index', [
+            'projects' => $projects
+        ]);
+
+    }
+
+    public function indexClient(): Response
+    {
+        $userId = Auth::id();
+
+        $projects = Project::join('client', 'project.client_id', '=', 'client.id')
+        ->select('project.*', 'client.name as client_name') 
+        ->where('project.client_id', $userId) 
+        ->orderBy('project.id', 'desc')
+        ->get();
+
+        return Inertia::render('project/IndexClient', [
             'projects' => $projects
         ]);
 

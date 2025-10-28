@@ -22,9 +22,14 @@ Route::middleware('guest')->group(function () {
     Route::get('supplier', [AuthenticatedSessionController::class, 'supplier'])
         ->name('supplier');
 
+    Route::get('client', [AuthenticatedSessionController::class, 'client'])
+        ->name('client');
+
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
     Route::post('loginsupplier', [AuthenticatedSessionController::class, 'storeSupplier'])->name('loginsupplier');
+
+    Route::post('loginclient', [AuthenticatedSessionController::class, 'storeClient'])->name('loginclient');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
@@ -54,9 +59,19 @@ Route::middleware('auth')->group(function () {
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
         ->name('password.confirm');
 
-    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])
-        ->middleware('throttle:6,1');
+    // Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])
+    //     ->middleware('throttle:6,1');
+
+
+
+});
+
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
-});
+
+    Route::post('logoutclient', [AuthenticatedSessionController::class, 'destroyClient'])
+        ->name('logoutclient');
+
+    Route::post('logoutsupplier', [AuthenticatedSessionController::class, 'destroySupplier'])
+        ->name('logoutsupplier');

@@ -523,22 +523,18 @@ const rabView = ref(null);
 
 const downloadRABPDF = (data, product, project) => {
   // Encode semua parameter menjadi URI-safe
-  const params = new URLSearchParams();
-  params.append('projectPekerjaan', encodeURIComponent(JSON.stringify(data)));
-  params.append('product', encodeURIComponent(JSON.stringify(product)));
-  params.append('project', project);
+  // const params = new URLSearchParams();
+  // params.append('projectPekerjaan', encodeURIComponent(JSON.stringify(data)));
+  // params.append('product', encodeURIComponent(JSON.stringify(product)));
+  // params.append('project', project);
 
 
-  const url = `/rab/pdf?${params.toString()}`;
+  const url = `/rab/pdf2?project=${project}`;
   window.open(url, '_blank');
 };
 
-const downloadRABExcel = (data, product) => {
-  const params = new URLSearchParams();
-  params.append('projectPekerjaan', encodeURIComponent(JSON.stringify(data)));
-  params.append('projectProduct', encodeURIComponent(JSON.stringify(product)));
-
-  const url = `/rab/excel?${params.toString()}`;
+const downloadRABExcel = (data, product, project) => {
+  const url = `/rab/excel2?project=${project}`;
   window.open(url, '_blank');
 };
 
@@ -643,7 +639,7 @@ const downloadRABExcel = (data, product) => {
                   <button
                     v-if="selectedProject.rab !== 1"
                     class="btn m-3 bg-green-500 p-2 text-white ml-2 mb-4 cursor-pointer w-full float-end"
-                     @click="downloadRABExcel(projectPekerjaan, projectproduct)" 
+                     @click="downloadRABExcel(projectPekerjaan, projectproduct, selectedProjectId)" 
                   >
                     <i class="fa-solid fa-download"></i> DOWNLOAD EXCEL RAB
                   </button>
@@ -828,7 +824,7 @@ const downloadRABExcel = (data, product) => {
                         :key="dtl.id"
                       >
 
-                        <td colspan="2" class="border px-2 py-2 text-center">
+                        <td colspan="2" class="border px-2 py-2 text-center" style="width: 40%;">
                           {{ dtl.tambahan }}
                           <span
                             v-if="dtl.supplier_name"
@@ -1008,14 +1004,14 @@ const downloadRABExcel = (data, product) => {
                             </button>
                           </td>
                           <td class="border px-2 py-2 text-center">
-  {{ dtl.tambahan }}
-  <span
-    v-if="dtl.supplier_name"
-    class="ml-2 inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full"
-  >
-    {{ dtl.supplier_name }}
-  </span>
-</td>
+                            {{ dtl.tambahan }}
+                            <span
+                              v-if="dtl.supplier_name"
+                              class="ml-2 inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full"
+                            >
+                              {{ dtl.supplier_name }}
+                            </span>
+                          </td>
                           <td class="border px-2 py-2 text-center w-[150px]">{{ dtl.satuan }}</td>
                           <td class="border px-2 py-2 text-center w-[150px]">
                             {{ formatCurrency(dtl.total_estimasi_price) }}
@@ -1060,7 +1056,7 @@ const downloadRABExcel = (data, product) => {
                     <button
                       v-if="selectedProject.rab !== 1"
                       class="btn m-3 bg-green-500 p-2 text-white ml-2 mb-4 cursor-pointer w-full float-end"
-                      @click="downloadRABExcel(projectPekerjaan, projectproduct)" 
+                      @click="downloadRABExcel(projectPekerjaan, projectproduct, selectedProjectId )" 
                     >
                       <i class="fa-solid fa-download"></i> DOWNLOAD EXCEL RAB
                     </button>
@@ -1099,7 +1095,7 @@ const downloadRABExcel = (data, product) => {
                           :key="dtl.id"
                         >
 
-                          <td colspan="2" class="border px-2 py-2 text-center">
+                          <td colspan="2" class="border px-2 py-2 text-center" style="width: 40%;">
   {{ dtl.tambahan }}
   <span
     v-if="dtl.supplier_name"
@@ -1296,7 +1292,7 @@ const downloadRABExcel = (data, product) => {
                     <button
                       v-if="selectedProject.rab !== 1"
                       class="btn m-3 bg-green-500 p-2 text-white ml-2 mb-4 cursor-pointer w-full float-end"
-                      @click="downloadRABExcel(projectPekerjaan, projectproduct)" 
+                      @click="downloadRABExcel(projectPekerjaan, projectproduct, selectedProjectId)" 
                     >
                       <i class="fa-solid fa-download"></i> DOWNLOAD EXCEL RAB
                     </button>
@@ -1335,7 +1331,7 @@ const downloadRABExcel = (data, product) => {
                           :key="dtl.id"
                         >
 
-                          <td colspan="2" class="border px-2 py-2 text-center">
+                          <td colspan="2" class="border px-2 py-2 text-center" style="width: 40%;">
   {{ dtl.tambahan }}
   <span
     v-if="dtl.supplier_name"

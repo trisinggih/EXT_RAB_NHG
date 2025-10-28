@@ -75,25 +75,30 @@ const userNavItems: NavItem[] = [
     href: '/dashboard',
     icon: LayoutGrid,
   },
- {
-    title: 'Referensi',
-    href: '#',
+//  {
+//     title: 'Referensi',
+//     href: '#',
+//     icon: Folder,
+//     children: [
+//       { title: 'Pekerjaan', href: '/pekerjaan' },
+//       { title: 'Production', href: '/bom' },
+//     ],
+//   },
+  {
+    title: 'Pekerjaan',
+    href: '/pekerjaan',
     icon: Folder,
-    children: [
-      { title: 'Pekerjaan', href: '/pekerjaan' },
-      { title: 'Production', href: '/bom' },
-    ],
   },
   {
-    title: 'Projects',
-    href: '/projects',
+    title: 'Production',
+    href: '/bom',
     icon: FileBadge,
   },
-  {
-    title: 'Anggaran',
-    href: '/anggaran',
-    icon: HandCoins,
-  },
+  // {
+  //   title: 'Anggaran',
+  //   href: '/anggaran',
+  //   icon: HandCoins,
+  // },
 ]
 
 const engineerrNavItems: NavItem[] = [

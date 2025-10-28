@@ -53,7 +53,8 @@ const settingweb = computed(() => props.settingweb)
           <a href="/allprojects" class="hover:underline mt-2">Projects</a>
           <a href="/#kontak" class="hover:underline mt-2">Hubungi Kami</a>
 
-          <a href="/supplier" class="hover:underline btn bg-yellow-600 p-2 rounded-lg ">Supplier</a>
+          <a href="/supplier" class="hover:underline btn bg-yellow-600 p-2 rounded-lg mr-1">Supplier</a>
+          <a href="/client" class="hover:underline btn bg-green-800 p-2 rounded-lg ">Client</a>
         </nav>
       </div>
     </header>   

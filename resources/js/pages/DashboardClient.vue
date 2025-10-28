@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import SupplierLayout from '@/layouts/SupplierLayout.vue';
+import ClientLayout from '@/layouts/ClientLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { ref, onMounted, computed } from 'vue'
-
+import axios from 'axios'
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, LineElement, PointElement } from 'chart.js'
+import { Bar } from 'vue-chartjs'
 import { usePage } from '@inertiajs/vue3';
 
 const hal = usePage()
@@ -15,11 +17,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 
+
 </script>
 
 <template>
-  <SupplierLayout :breadcrumbs="breadcrumbs">
-    <main class="flex-1 flex items-center justify-center">
+  <ClientLayout :breadcrumbs="breadcrumbs">
+     <main class="flex-1 flex items-center justify-center">
       <div class="flex flex-col items-center space-y-4">
         <!-- Kotak merah -->
         <div class="w-40 h-40 ">
@@ -36,5 +39,5 @@ const breadcrumbs: BreadcrumbItem[] = [
         </h2>
       </div>
     </main>
-  </SupplierLayout>
+  </ClientLayout>
 </template>
