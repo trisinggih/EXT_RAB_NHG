@@ -24,7 +24,7 @@ class AnggaranController extends Controller
 {
     public function index(): Response
     {
-        $projects = Project::get();
+        $projects = Project::where('rab','<','4')->get();
         $pekerjaan = Pekerjaan::get();
         $product = Product::get();
         $jasa = Jasa::get();
