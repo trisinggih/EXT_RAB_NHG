@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ProductPekerjaan;
 use App\Models\Pekerjaan;
 use App\Models\ProductDetail;
+use App\Models\PekerjaanDetail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,8 +23,26 @@ class ProductPekerjaanController extends Controller
         ]);
         $cek = ProductPekerjaan::where('product_id', $request->product_id)->where('pekerjaan_id',$request->pekerjaan_id)->count();
         if($cek == 0){
-            ProductPekerjaan::create($data);
+            $product = ProductPekerjaan::create($data);
+            $id = $product->id;
+
+            $cekdetail = PekerjaanDetail::where('pekerjaan_id', $request->pekerjaan_id)->get();
+            foreach($cekdetail as $cd){
+                ProductDetail::create([
+                    'product_id' => $request->product_id,
+                    'pekerjaan_id' =>  $id,
+                    'tambahan' => $cd->name,
+                    'jumlah' => $cd->jumlah,
+                    'estimasi_price' => $cd->biaya,
+                    'satuan' => $cd->satuan,
+                    'pekerjaan_detail_id' => $cd->id,
+                ]
+                );
+            }
         }
+
+        
+
         
 
          

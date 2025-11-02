@@ -44,6 +44,7 @@ interface Jasa {
 const form = useForm({
   project_id: null as number | null,
   pekerjaan_id: null as number | null,
+  product_id:null as number | null,
 });
 
 const formProduct = useForm({
@@ -58,6 +59,7 @@ const formDetail = useForm({
   id: null as number | null,
   project_id: null as number | null,
   pekerjaan_id: null as number | null,
+  product_id: null as number | null,
   rab: '',
   tambahan: '',    
   satuan: '',  
@@ -212,8 +214,19 @@ const handleSubmitProduct = async () => {
       "https://api-rab.erainovasi.id/simpanproduct",
       formProduct
     );
+     showAddProductModal.value = false;
+     if (selectedProjectId.value) {
+        try {
+          const response = await axios.get(`/projectpekerjaan/${selectedProjectId.value}`);
+          projectPekerjaan.value = response.data;
+          await loadProjectData(selectedProjectId.value);
+        } catch (error) {
+          console.error("Gagal refresh project pekerjaan:", error);
+        }
+      }
 
-    router.visit(window.location.pathname, { replace: true });
+    // router.visit(window.location.pathname, { replace: true });
+    
 
   } catch (error) {
     console.error("Gagal simpan product:", error);
@@ -265,6 +278,7 @@ const selectSupplier = async (supplier) => {
 const handleSaveDetail = () => {
   formDetail.project_id = selectedProjectId.value;
   formDetail.pekerjaan_id = selectedPekerjaanId.value;
+  formDetail.product_id = selectedProductId.value;
   formDetail.rab = detailTab.value;
   formDetail.post(route('anggaran.detail'), {
     onSuccess: async () => {
@@ -380,10 +394,15 @@ const deleteDetail = async (detailId: number) => {
   try {
     await axios.get(`/anggarandelete/${detailId}/${selectedProjectId.value}`);
 
-    const response = await axios.get(`/projectpekerjaan/${selectedProjectId.value}`);
-    projectPekerjaan.value = response.data;
-    await loadProjectData(selectedProjectId.value);
-    alert("Detail berhasil dihapus!");
+    if (selectedProjectId.value) {
+      try {
+        const response = await axios.get(`/projectpekerjaan/${selectedProjectId.value}`);
+        projectPekerjaan.value = response.data;
+        await loadProjectData(selectedProjectId.value);
+      } catch (error) {
+        console.error("Gagal refresh project pekerjaan:", error);
+      }
+    }
 
   } catch (error) {
     console.error("Gagal hapus detail:", error);
@@ -423,12 +442,17 @@ const deletePekerjaan = async (detailId: number) => {
   if (!confirm("Yakin ingin menghapus detail ini?")) return;
 
   try {
-    await axios.get(`/anggaranpekerjaandelete/${detailId}`);
+    await axios.get(`/anggaranpekerjaandelete/${selectedPekerjaanId}`);
 
-    const response = await axios.get(`/projectpekerjaan/${selectedProjectId.value}`);
-    projectPekerjaan.value = response.data;
-    await loadProjectData(selectedProjectId.value);
-    alert("Detail berhasil dihapus!");
+    if (selectedProjectId.value) {
+      try {
+        const response = await axios.get(`/projectpekerjaan/${selectedProjectId.value}`);
+        projectPekerjaan.value = response.data;
+        await loadProjectData(selectedProjectId.value);
+      } catch (error) {
+        console.error("Gagal refresh project pekerjaan:", error);
+      }
+    }
 
   } catch (error) {
     console.error("Gagal hapus detail:", error);
@@ -616,7 +640,7 @@ const downloadRABExcel = (data, product, project) => {
                 </h4>
                 <ol>
                   <li v-for="value in projectproduct" :key="value.id">
-                    {{ value.keterangan }}
+                    {{ value.product_name }}
                   </li>
                 </ol>
               </div>
@@ -654,17 +678,11 @@ const downloadRABExcel = (data, product, project) => {
 
               <!-- Jika RAB aktif -->
               <div class="p-0 mt-2" v-if="selectedProject.rab === 1">
-                <button
-                  v-if="projectproduct.length !== 0"
-                  class="btn bg-primary p-2 text-white mb-2 cursor-pointer"
-                  @click="showAddJobModal = true"
-                >
-                  + Tambah Pekerjaan
-                </button>
+                
                 <button
                   v-if="projectproduct.length !== 0"
                   @click="handleApproveRabAwal"
-                  class="btn bg-yellow-500 p-2 text-white ml-2 mb-2 cursor-pointer"
+                  class="btn bg-yellow-500 p-2 text-white mb-2 cursor-pointer"
                 >
                   Approve RAB Awal
                 </button>
@@ -672,7 +690,16 @@ const downloadRABExcel = (data, product, project) => {
 
                 <div  v-for="product in projectproduct" :key="product.id" class="mb-6 mt-2">
                   <h3 class="font-bold text-lg p-3 bg-primary text-white">
-                    {{ product.keterangan }}
+                    {{ product.product_name }}
+
+                    <!-- <button
+                      v-if="projectproduct.length !== 0"
+                      class="btn bg-green-500 p-2 text-white float-right cursor-pointer"
+                      style="font-size: 15px;margin-bottom: 10px;margin-top: -4px;"
+                      @click=" () => { form.product_id = product.product_id; form.pekerjaan_id = product.pekerjaan_id; showAddJobModal = true; } "
+                    >
+                      + Tambah Pekerjaan
+                    </button> -->
                   </h3>
 
 
@@ -691,6 +718,7 @@ const downloadRABExcel = (data, product, project) => {
                             class="p-1 btn text-sm bg-primary text-white cursor-pointer"
                             @click="() => { 
                               selectedPekerjaanId = value.pekerjaan_id; 
+                              selectedProductId = value.product_id; 
                               showAddDetailModal = true; 
                               detailTab = 'produk'; 
                             }"
@@ -801,7 +829,7 @@ const downloadRABExcel = (data, product, project) => {
 
                 <div v-for="product in projectproduct" :key="product.id" class="mb-6 mt-2">
                   <h3 class="font-bold text-lg p-3 bg-primary text-white">
-                    {{ product.keterangan }}
+                    {{ product.product_name }}
                   </h3>
 
 
@@ -914,7 +942,7 @@ const downloadRABExcel = (data, product, project) => {
                   </h4>
                   <ol>
                           <li v-for="value in projectproduct" :key="value.id">
-                            {{ value.keterangan  }}
+                            {{ value.product_name  }}
                           </li>
                     </ol>
               </div>
@@ -925,17 +953,11 @@ const downloadRABExcel = (data, product, project) => {
                 
                   <!-- Jika RAB aktif -->
                   <div class="p-0" v-if="selectedProject.rab === 2">
-                    <button
-                      v-if="projectproduct.length !== 0"
-                      class="btn bg-primary p-2 text-white mb-2 cursor-pointer"
-                      @click="showAddJobModal = true"
-                    >
-                      + Tambah Pekerjaan
-                    </button>
+
                     <button
                       v-if="projectproduct.length !== 0"
                       @click="handleApproveRabKedua"
-                      class="btn bg-yellow-500 p-2 text-white ml-2 mb-2 cursor-pointer"
+                      class="btn bg-yellow-500 p-2 text-white mb-2 cursor-pointer"
                     >
                       Approve RAB Kedua
                     </button>
@@ -943,7 +965,17 @@ const downloadRABExcel = (data, product, project) => {
 
                   <div  v-for="product in projectproduct" :key="product.id" class="mb-6 mt-2">
                     <h3 class="font-bold text-lg p-3 bg-primary text-white">
-                      {{ product.keterangan }}
+                      {{ product.product_name }}
+
+                      <!-- <button
+                      v-if="projectproduct.length !== 0"
+                      class="btn bg-green-500 p-2 text-white float-right cursor-pointer"
+                      style="font-size: 15px;margin-bottom: 10px;margin-top: -4px;"
+                      @click=" () => { form.product_id = product.product_id; form.pekerjaan_id = product.pekerjaan_id; showAddJobModal = true; } "
+                    >
+                      + Tambah Pekerjaan
+                    </button> -->
+
                     </h3>
 
 
@@ -1072,7 +1104,7 @@ const downloadRABExcel = (data, product, project) => {
 
                     <div v-for="product in projectproduct" :key="product.id" class="mb-6 mt-2">
                     <h3 class="font-bold text-lg p-3 bg-primary text-white">
-                      {{ product.keterangan }}
+                      {{ product.product_name }}
                     </h3>
 
 
@@ -1150,7 +1182,7 @@ const downloadRABExcel = (data, product, project) => {
                   </h4>
                   <ol>
                           <li v-for="value in projectproduct" :key="value.id">
-                            {{ value.keterangan  }}
+                            {{ value.product_name  }}
                           </li>
                     </ol>
               </div>
@@ -1161,13 +1193,7 @@ const downloadRABExcel = (data, product, project) => {
                 
                   <!-- Jika RAB aktif -->
                   <div class="p-0" v-if="selectedProject.rab === 3">
-                    <button
-                      v-if="projectproduct.length !== 0"
-                      class="btn bg-primary p-2 text-white mb-2 cursor-pointer"
-                      @click="showAddJobModal = true"
-                    >
-                      + Tambah Pekerjaan
-                    </button>
+              
                     <button
                       v-if="projectproduct.length !== 0"
                       @click="handleApproveRabFinal"
@@ -1179,7 +1205,15 @@ const downloadRABExcel = (data, product, project) => {
 
                   <div  v-for="product in projectproduct" :key="product.id" class="mb-6 mt-2">
                     <h3 class="font-bold text-lg p-3 bg-primary text-white">
-                      {{ product.keterangan }}
+                      {{ product.product_name }}
+                       <!-- <button
+                      v-if="projectproduct.length !== 0"
+                      class="btn bg-green-500 p-2 text-white float-right cursor-pointer"
+                      style="font-size: 15px;margin-bottom: 10px;margin-top: -4px;"
+                      @click=" () => { form.product_id = product.product_id; form.pekerjaan_id = product.pekerjaan_id; showAddJobModal = true; } "
+                    >
+                      + Tambah Pekerjaan
+                    </button> -->
                     </h3>
 
 
@@ -1308,7 +1342,7 @@ const downloadRABExcel = (data, product, project) => {
 
                     <div v-for="product in projectproduct" :key="product.id" class="mb-6 mt-2">
                     <h3 class="font-bold text-lg p-3 bg-primary text-white">
-                      {{ product.keterangan }}
+                      {{ product.product_name }}
                     </h3>
 
 
@@ -1389,6 +1423,7 @@ const downloadRABExcel = (data, product, project) => {
     <h2 class="text-lg font-semibold">Tambah Pekerjaan</h2>
     <form class="w-12/12 space-y-4" @submit.prevent="handleSubmit">
       <input type="hidden" v-model="form.project_id" />
+      <input type="hidden" v-model="form.product_id" />
     <div>
       <label class="block mb-1">Pilih Pekerjaan:</label>
       <select v-model="form.pekerjaan_id" class="w-full border p-2 rounded">
@@ -1449,8 +1484,8 @@ const downloadRABExcel = (data, product, project) => {
     </div>
 
     <div>
-        <label class="block mb-1">Keterangan:<span class="text-danger">Wajib Isi</span></label>
-        <input type="text" v-model="formProduct.keterangan" class="w-full border p-2 rounded" />
+        <label class="block mb-1">Keterangan:<span class="text-red-500">Wajib Isi</span></label>
+        <input type="text" v-model="formProduct.keterangan" required class="w-full border p-2 rounded" />
 
     </div>
 

@@ -14,6 +14,7 @@ class ProjectDetailTambahan extends Model
     protected $fillable = [
         'project_id',
         'pekerjaan_id',
+        'product_id',
         'tambahan',
         'jumlah',
         'estimasi_price',

@@ -57,12 +57,14 @@ class AnggaranController extends Controller
         $validated = $request->validate([
             'project_id' => 'required',
             'pekerjaan_id' => 'required',
+            'product_id' => 'required'
         ]);
-        $cekdata = ProjectPekerjaan::where('project_id', $validated['project_id'])->where('pekerjaan_id', $validated['pekerjaan_id'])->first();
+        $cekdata = ProjectPekerjaan::where('project_id', $validated['project_id'])->where('pekerjaan_id', $validated['pekerjaan_id'])->where('product_id', $validated['product_id'])->first();
         if (!$cekdata) {
             ProjectPekerjaan::create([
                 'project_id' => $validated['project_id'],
                 'pekerjaan_id' => $validated['pekerjaan_id'],
+                'product_id' => $validated['product_id'],
             ]);
         }
         

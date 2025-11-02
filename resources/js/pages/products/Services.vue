@@ -2,6 +2,9 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref, defineProps, reactive } from 'vue';
+import axios from "axios"
+
+const detailOptions = ref([])
 
 interface Product {
   id: number;
@@ -101,6 +104,35 @@ const deleteDetail = (id: number) => {
     router.delete(route('productpekerjaan.destroydetail', id));
   }
 };
+
+
+async function openDetailModal(pekerjaanId, productpekerjaanId) {
+  detailForm.pekerjaan_id = productpekerjaanId
+  showDetailModal.value = true
+
+  // 🔄 Load data select dari API
+  try {
+      const res = await axios.get(`/pekerjaan/${pekerjaanId}/detailjson`)
+      detailOptions.value = res.data
+    } catch (error) {
+      console.error("Gagal memuat data detail:", error)
+    }
+  }
+
+  function onSelectDetail(e) {
+  const selectedId = parseInt(e.target.value)
+    const selected = detailOptions.value.find(d => d.id === selectedId)
+
+    if (selected) {
+      detailForm.satuan = selected.satuan
+      detailForm.estimasi_price = selected.biaya
+      detailForm.jumlah = selected.jumlah || 1
+      detailForm.tambahan = selected.name
+    }
+  }
+
+
+
 </script>
 
 <template>
@@ -143,17 +175,24 @@ const deleteDetail = (id: number) => {
                         </td>
                         <td class="px-4 py-3 border w-[220px]">
                             <div class="flex gap-1" v-if="p.pekerjaan_id !== 2">
-                                <button
+                                <!-- <button
                                 @click="
                                     () => {
                                     detailForm.pekerjaan_id = p.id;
                                     showDetailModal = true;
+
                                     }
                                 "
                                 class="btn bg-primary p-2 text-white rounded"
                                 >
                                 Tambah Detail
-                                </button>
+                                </button> -->
+                                 <button
+                                    @click="openDetailModal(p.pekerjaan_id, p.id)"
+                                    class="btn bg-primary p-2 text-white rounded"
+                                  >
+                                    Tambah Detail
+                                  </button>
                                 <button
                                 @click="deletePekerjaan(p.id)"
                                 class="btn bg-red-500 p-2 text-white rounded"
@@ -243,13 +282,33 @@ const deleteDetail = (id: number) => {
         <h2 class="font-semibold text-lg mb-3">Tambah Detail</h2>
 
         <div class="grid gap-3">
+          
           <div>
             <label class="block text-sm font-medium mb-1">Komponen</label>
+            <select
+                @change="onSelectDetail"
+                class="border rounded p-2 w-full"
+              >
+                <option value="">-- Pilih Detail --</option>
+                <option
+                  v-for="d in detailOptions"
+                  :key="d.id"
+                  :value="d.id"
+                >
+                  {{ d.name }} — Rp {{ d.biaya.toLocaleString() }}
+                </option>
+              </select>
+          </div>
+
+          <hr></hr>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Detail</label>
             <input
-              v-model="detailForm.tambahan"
               type="text"
               class="border p-2 w-full rounded"
-              placeholder="Contoh: Pengecatan"
+              placeholder=""
+               v-model="detailForm.tambahan"
             />
           </div>
 

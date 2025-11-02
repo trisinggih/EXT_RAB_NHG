@@ -169,8 +169,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('pekerjaan/create', [PekerjaanController::class, 'Create'])->name('pekerjaan.create');
     Route::post('pekerjaan', [PekerjaanController::class, 'Store'])->name('pekerjaans.store');
     Route::get('pekerjaan/{pekerjaan}/edit', [PekerjaanController::class, 'Edit'])->name('pekerjaan.edit');
+    Route::get('pekerjaan/{pekerjaan}/detail', [PekerjaanController::class, 'Detail'])->name('pekerjaan.detail');
     Route::put('pekerjaan/{pekerjaan}', [PekerjaanController::class, 'Update'])->name('pekerjaans.update');
     Route::delete('pekerjaan/{pekerjaan}', [PekerjaanController::class, 'Destroy'])->name('pekerjaans.destroy');
+
+    Route::post('pekerjaandetail', [PekerjaanController::class, 'StoreDetail'])->name('pekerjaan.details.store');
+    Route::delete('pekerjaandetail/{pekerjaan}', [PekerjaanController::class, 'DestroyDetail'])->name('pekerjaan.details.destroy');
+    Route::get('pekerjaan/{pekerjaan}/detailjson', [PekerjaanController::class, 'DetailJson'])->name('pekerjaan.indexjson');
+
 
     Route::get('clients', [ClientController::class, 'Index'])->name('clients.index');
     Route::get('clients/create', [ClientController::class, 'Create'])->name('clients.create');

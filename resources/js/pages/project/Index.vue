@@ -127,7 +127,7 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
             <option :value="100">100</option>
           </select>
 
-          <Link :href="route('projects.create')">
+          <Link :href="route('projects.create')"  v-if="user.role_id === 1">
             <button class="btn bg-primary p-2 text-white rounded ml-2">Tambah Projects</button>
           </Link>
         </div>
