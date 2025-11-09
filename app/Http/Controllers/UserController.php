@@ -15,7 +15,7 @@ class UserController extends Controller
     {
         $users = User::join('role', 'users.role_id', '=', 'role.id')
             ->select('users.*', 'role.role as role_name')
-            ->paginate(10);
+            ->get();
         return Inertia::render('users/Index', [
             'users' => $users
         ]);

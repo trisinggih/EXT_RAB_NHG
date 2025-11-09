@@ -12,7 +12,7 @@ class RoleController extends Controller
 {
     public function index(): Response
     {
-        $roles = Role::paginate(10);
+        $roles = Role::all();
         return Inertia::render('role/Index', [
             'roles' => $roles
         ]);

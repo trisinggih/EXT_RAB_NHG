@@ -12,7 +12,7 @@ class BannerController extends Controller
 {
     public function index(): Response
     {
-        $banners = Banners::paginate(10);
+        $banners = Banners::all();
         return Inertia::render('banner/Index', [
             'banners' => $banners
         ]);

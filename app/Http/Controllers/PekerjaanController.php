@@ -13,7 +13,7 @@ class PekerjaanController extends Controller
 {
     public function index(): Response
     {
-        $pekerjaan = Pekerjaan::paginate(10);
+        $pekerjaan = Pekerjaan::all();
         return Inertia::render('pekerjaan/Index', [
             'pekerjaan' => $pekerjaan
         ]);

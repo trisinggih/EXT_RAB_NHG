@@ -16,7 +16,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const roles = ref(props.roles?.data ?? [])
+const roles = ref(props.roles ?? [])
+
+
 
 onMounted(async () => {
   if (!roles.value.length) {

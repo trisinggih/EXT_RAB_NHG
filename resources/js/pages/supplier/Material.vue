@@ -52,9 +52,9 @@ const submitMaterial = () => {
     onSuccess: () => {
       form.reset();
       form.supplier_id = props.supplier.id;
-      selectedMaterial.value = null;
-
+      resetDisplayPrice(); // 🔥 pastikan tampilan harga ikut direset
       router.reload({ only: ['materials'] });
+      alert('Data berhasil ditambahkan.');
     },
     onFinish: () => {
       adding.value = false;
@@ -98,11 +98,22 @@ const formatNumber = (value) => {
 // simpan tampilan input
 const displayPrice = ref(formatNumber(form.price))
 
+// helper untuk reset tampilan harga
+const resetDisplayPrice = () => {
+  displayPrice.value = ''
+  form.price = 0
+}
+
 // setiap kali user ubah tampilan → simpan nilai asli ke form.price
-watch(displayPrice, (val) => {
-  const numeric = val.replace(/\D/g, '') // hapus karakter non-angka
+watch(displayPrice, (val, oldVal) => {
+  if (val === oldVal) return
+  const numeric = val.replace(/\D/g, '')
   form.price = Number(numeric || 0)
-  displayPrice.value = formatNumber(numeric)
+  // hanya update tampilan kalau val != formatNumber(numeric) → biar gak loop
+  const formatted = formatNumber(numeric)
+  if (formatted !== val) {
+    displayPrice.value = formatted
+  }
 })
 </script>
 
@@ -203,7 +214,7 @@ watch(displayPrice, (val) => {
             <td class="border border-gray-300 px-4 py-2">{{ index + 1 }}</td>
             <td class="border border-gray-300 px-4 py-2">{{ material.material_name }}</td>
             <td class="border border-gray-300 px-4 py-2">{{ material.material_satuan }}</td> 
-            <td class="border border-gray-300 px-4 py-2">Rp {{ material.price.toLocaleString('id-ID') }}</td>
+            <td class="border border-gray-300 px-4 py-2">Rp {{ Number(material.price).toLocaleString('id-ID') }}</td>
             <td class="border border-gray-300 px-4 py-2">
               <a :href="material.link" target="_blank"><button
                 class="text-blue-500 hover:underline"

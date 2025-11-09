@@ -17,7 +17,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const materials = ref(props.material?.data ?? [])
+// const materials = ref(props.material?.data ?? [])
+const materials = ref(props.material ?? [])
 
 const source = computed(() => materials.value)
 

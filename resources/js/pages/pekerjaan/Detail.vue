@@ -16,7 +16,7 @@ interface DetailPekerjaan {
   id: number;
   pekerjaan_id: number;
   name: string;
-  satuan:string;
+  satuan: string;
   jumlah: number;
   biaya: number;
   subtotal: number;
@@ -30,7 +30,7 @@ const props = defineProps<{
 const form = useForm({
   pekerjaan_id: props.pekerjaan.id,
   name: '',
-  satuan:'',
+  satuan: '',
   jumlah: 0,
   biaya: 0,
   subtotal: 0,
@@ -38,37 +38,54 @@ const form = useForm({
 
 const adding = ref(false);
 
-// fungsi untuk format angka ribuan
+// ✅ format angka ke ribuan (mendukung koma desimal)
 const formatNumber = (val: number | string): string => {
-  if (!val) return '';
-  return new Intl.NumberFormat('id-ID').format(Number(val));
+  if (val === null || val === undefined || val === '') return '';
+  const num = Number(val.toString().replace(',', '.'));
+  if (isNaN(num)) return val.toString();
+  return new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(num);
 };
 
-// ---- Input reactive dengan tampilan format angka ----
+// Input reactive
 const displayJumlah = ref('');
 const displayBiaya = ref('');
 const displaySubtotal = ref('');
 
-// Update nilai form saat user mengetik
-watch(displayJumlah, (val) => {
-  const numeric = Number(val.replace(/\D/g, '')) || 0;
+// ✅ Watch untuk jumlah (mendukung koma)
+watch(displayJumlah, (val, oldVal) => {
+  const cleanVal = val.replace(/[^0-9.,]/g, '').replace(',', '.');
+  const numeric = parseFloat(cleanVal) || 0;
   form.jumlah = numeric;
-  displayJumlah.value = formatNumber(numeric);
+
+  // biar gak ganggu saat user baru ngetik koma
+  if (val.endsWith(',') || val.endsWith('.')) return;
+
+  const formatted = formatNumber(numeric);
+  if (formatted !== val) {
+    displayJumlah.value = formatted;
+  }
 });
 
-watch(displayBiaya, (val) => {
+// ✅ Watch untuk biaya (integer)
+watch(displayBiaya, (val, oldVal) => {
   const numeric = Number(val.replace(/\D/g, '')) || 0;
   form.biaya = numeric;
-  displayBiaya.value = formatNumber(numeric);
+  const formatted = formatNumber(numeric);
+  if (formatted !== val) {
+    displayBiaya.value = formatted;
+  }
 });
 
-// Hitung subtotal otomatis setiap kali jumlah/biaya berubah
+// ✅ Hitung subtotal otomatis
 watch([() => form.jumlah, () => form.biaya], ([jumlah, biaya]) => {
   form.subtotal = jumlah * biaya;
   displaySubtotal.value = formatNumber(form.subtotal);
 });
 
-// Submit form
+// ✅ Submit form
 const submitMaterial = () => {
   adding.value = true;
   form.post(route('pekerjaan.details.store'), {
@@ -79,6 +96,7 @@ const submitMaterial = () => {
       displaySubtotal.value = '';
       form.pekerjaan_id = props.pekerjaan.id;
       router.reload({ only: ['details'] });
+      alert('Data berhasil ditambahkan!');
     },
     onFinish: () => {
       adding.value = false;
@@ -86,13 +104,14 @@ const submitMaterial = () => {
   });
 };
 
-// Hapus data
+// ✅ Hapus data
 const handleDetailDeletion = (id: number) => {
   if (confirm('Yakin ingin menghapus data ini?')) {
     router.delete(route('pekerjaan.details.destroy', { id }), {
       preserveScroll: true,
       onSuccess: () => {
         router.reload({ only: ['details'] });
+        alert('Data berhasil dihapus.');
       },
     });
   }
@@ -109,7 +128,9 @@ const handleDetailDeletion = (id: number) => {
     ]"
   >
     <div class="mb-6">
-      <h1 class="text-lg font-semibold text-white bg-primary px-5 py-3 rounded-se-xl shadow border-b-2 border-secondary">
+      <h1
+        class="text-lg font-semibold text-white bg-primary px-5 py-3 rounded-se-xl shadow border-b-2 border-secondary"
+      >
         Data Detail Pekerjaan
         <p class="text-white mt-1 text-sm font-normal">Informasi detail pekerjaan.</p>
       </h1>
@@ -119,19 +140,26 @@ const handleDetailDeletion = (id: number) => {
       <!-- Form Input -->
       <form @submit.prevent="submitMaterial" class="space-y-4 mb-6">
         <div class="grid grid-cols-2 gap-4">
-
-            <div>
+          <div>
             <Label for="name" class="mb-1 block">Nama Pekerjaan</Label>
-            <Input id="name" v-model="form.name" type="text" placeholder="Masukkan nama detail pekerjaan" />
-            </div>
+            <Input
+              id="name"
+              v-model="form.name"
+              type="text"
+              placeholder="Masukkan nama detail pekerjaan"
+            />
+          </div>
 
-             <div>
+          <div>
             <Label for="satuan" class="mb-1 block">Satuan</Label>
-            <Input id="satuan" v-model="form.satuan" type="text" placeholder="Masukkan satuan" />
-            </div>
-
+            <Input
+              id="satuan"
+              v-model="form.satuan"
+              type="text"
+              placeholder="Masukkan satuan"
+            />
+          </div>
         </div>
-
 
         <div class="grid grid-cols-3 gap-4">
           <div>
@@ -141,7 +169,7 @@ const handleDetailDeletion = (id: number) => {
               v-model="displayJumlah"
               type="text"
               placeholder="0"
-              inputmode="numeric"
+              inputmode="decimal"
             />
           </div>
 
@@ -209,7 +237,7 @@ const handleDetailDeletion = (id: number) => {
           </tr>
 
           <tr v-if="props.details.length === 0">
-            <td colspan="6" class="text-center p-4 text-gray-500 italic">
+            <td colspan="7" class="text-center p-4 text-gray-500 italic">
               Belum ada data detail pekerjaan.
             </td>
           </tr>

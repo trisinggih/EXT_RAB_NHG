@@ -12,7 +12,7 @@ class BlogController extends Controller
 {
     public function index(): Response
     {
-        $blogs = Blogs::paginate(10);
+        $blogs = Blogs::all();
         return Inertia::render('blog/Index', [
             'blogs' => $blogs
         ]);

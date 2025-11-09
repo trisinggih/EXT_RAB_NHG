@@ -19,7 +19,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const pekerjaans = ref(props.pekerjaan?.data ?? [])
+const pekerjaans = ref(props.pekerjaan ?? [])
 
 onMounted(async () => {
   if (!pekerjaans.value.length) {

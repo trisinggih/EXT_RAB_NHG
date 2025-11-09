@@ -31,7 +31,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const users = ref(props.users?.data ?? [])
+const users = ref(props.users ?? [])
 
 onMounted(async () => {
   if (!users.value.length) {

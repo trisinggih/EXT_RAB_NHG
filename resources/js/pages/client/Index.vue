@@ -17,7 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const clients = ref(props.clients?.data ?? [])
+const clients = ref(props.clients ?? [])
 
 onMounted(async () => {
   if (!clients.value.length) {

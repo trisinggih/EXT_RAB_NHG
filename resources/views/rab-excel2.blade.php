@@ -122,7 +122,7 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $d['tambahan'] ?? '-' }}</td>
                                     <td>{{ $d['satuan'] ?? '-' }}</td>
-                                    <td class="text-right">Rp {{ number_format($qty, 2, ',', '.') }}</td>
+                                    <td class="text-right">'{{ number_format($qty, 2, ',', '.') }}</td>
                                     <td class="text-right">Rp {{ number_format($harga, 0, ',', '.') }}</td>
                                     <td class="text-right">Rp {{ number_format($total, 0, ',', '.') }}</td>
                                 </tr>
@@ -134,7 +134,7 @@
 
                             {{-- Subtotal per pekerjaan --}}
                             <tr style="font-weight: bold; background-color: #f9f9f9;">
-                                <td colspan="5" class="text-right">Subtotal {{ $pekerjaan['pekerjaan_name'] }}</td>
+                                <td colspan="5" class="text-right">Subtotal </td>
                                 <td class="text-right">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
                             </tr>
 
@@ -156,8 +156,20 @@
                         @php
                             $grandTotalAll += $grandTotalProduct;
                         @endphp
+
+                        <tr style="font-weight: bold; background-color: #e6f7ff;">
+                            <td colspan="6" class="text-right"></td>
+                        </tr>
        
             @endforeach
+
+                        <tr style="font-weight: bold; background-color: #e6f7ff;">
+                            <td colspan="6" class="text-right"></td>
+                        </tr>
+
+                        <tr style="font-weight: bold; background-color: #e6f7ff;">
+                            <td colspan="6" class="text-right"></td>
+                        </tr>
 
 
                 </tbody>

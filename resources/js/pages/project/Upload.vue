@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { Head, useForm, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
@@ -114,6 +114,50 @@ const deleteFoto = (id: number) => {
     }
   })
 }
+
+// === Full Preview + Navigasi ===
+const showPreview = ref(false)
+const selectedImage = ref<string | null>(null)
+const selectedIndex = ref<number>(0)
+const previewList = ref<string[]>([])
+
+const openPreview = (url: string, list: string[], index: number) => {
+  previewList.value = list
+  selectedIndex.value = index
+  selectedImage.value = url
+  showPreview.value = true
+}
+
+const closePreview = () => {
+  showPreview.value = false
+  selectedImage.value = null
+  previewList.value = []
+}
+
+const nextImage = () => {
+  if (!previewList.value.length) return
+  selectedIndex.value = (selectedIndex.value + 1) % previewList.value.length
+  selectedImage.value = previewList.value[selectedIndex.value]
+}
+
+const prevImage = () => {
+  if (!previewList.value.length) return
+  selectedIndex.value =
+    (selectedIndex.value - 1 + previewList.value.length) %
+    previewList.value.length
+  selectedImage.value = previewList.value[selectedIndex.value]
+}
+
+// === Keyboard Navigation ===
+const handleKey = (e: KeyboardEvent) => {
+  if (!showPreview.value) return
+  if (e.key === 'ArrowRight') nextImage()
+  if (e.key === 'ArrowLeft') prevImage()
+  if (e.key === 'Escape') closePreview()
+}
+
+onMounted(() => window.addEventListener('keydown', handleKey))
+onBeforeUnmount(() => window.removeEventListener('keydown', handleKey))
 </script>
 
 <template>
@@ -171,8 +215,9 @@ const deleteFoto = (id: number) => {
         >
           <img
             :src="p.url"
-            class="object-cover w-full h-40 border-b"
+            class="object-cover w-full h-40 border-b cursor-pointer hover:opacity-80 transition"
             alt="Preview"
+            @click="openPreview(p.url, previews.map(i => i.url), index)"
           />
 
           <div class="p-3 space-y-2">
@@ -213,14 +258,15 @@ const deleteFoto = (id: number) => {
         <h2 class="text-md font-semibold mb-3">Foto Tersimpan</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           <div
-            v-for="g in props.projectGambar"
+            v-for="(g, index) in props.projectGambar"
             :key="g.id"
             class="relative border rounded-lg overflow-hidden group"
           >
             <img
               :src="`/storage/${g.gambar}`"
-              class="object-cover w-full h-32"
+              class="object-cover w-full h-32 cursor-pointer hover:opacity-80 transition"
               alt="Gambar project"
+              @click="openPreview(`/storage/${g.gambar}`, props.projectGambar.map(i => `/storage/${i.gambar}`), index)"
             />
             <button
               type="button"
@@ -235,6 +281,41 @@ const deleteFoto = (id: number) => {
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- === Modal Full Preview === -->
+    <div
+      v-if="showPreview"
+      class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
+      @click.self="closePreview"
+    >
+      <button
+        class="absolute left-4 text-white text-4xl font-bold p-2 rounded-full hover:bg-white/20 transition"
+        @click.stop="prevImage"
+      >
+        ‹
+      </button>
+
+      <div class="relative max-w-6xl w-full flex justify-center p-4">
+        <img
+          :src="selectedImage"
+          class="max-h-[90vh] object-contain rounded-lg shadow-lg select-none"
+          alt="Full Preview"
+        />
+        <button
+          class="absolute top-4 right-4 bg-black bg-opacity-60 text-white rounded-full p-2 hover:bg-opacity-80 transition"
+          @click="closePreview"
+        >
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+
+      <button
+        class="absolute right-4 text-white text-4xl font-bold p-2 rounded-full hover:bg-white/20 transition"
+        @click.stop="nextImage"
+      >
+        ›
+      </button>
     </div>
   </AppLayout>
 </template>

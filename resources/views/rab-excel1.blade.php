@@ -70,8 +70,7 @@
                 $grandTotalAll += ($grandTotalProduct*$product['jumlah']);
             @endphp
         @endforeach
-    </tbody>
-</table>
+
 
 {{-- Rincian Akhir --}}
 @php
@@ -86,21 +85,30 @@
     $grandTotalFinal = $grandTotalAll + $profit + $feeKantor + $feeStaf + $feeKonsultan + $feeBendera + $feeMarketing + $pph + $ppn;
 @endphp
 
-<table width="100%" cellspacing="0" cellpadding="6" style="border-collapse: collapse; margin-top: 30px; font-size: 13px;">
-    <tr style="background-color: #f8f9fa; font-weight: bold;">
-        <td style="text-align:left;" colspan="5">TOTAL AWAL</td>
-        <td style="text-align:right; color: green;">Rp {{ number_format($grandTotalAll, 0, ',', '.') }}</td>
-    </tr>
-    <tr><td colspan="5">a. Profit 20%</td><td style="text-align:right;">Rp {{ number_format($profit, 0, ',', '.') }}</td></tr>
-    <tr><td colspan="5">b. Fee Kantor 20%</td><td style="text-align:right;">Rp {{ number_format($feeKantor, 0, ',', '.') }}</td></tr>
-    <tr><td colspan="5">c. Fee Staf 2%</td><td style="text-align:right;">Rp {{ number_format($feeStaf, 0, ',', '.') }}</td></tr>
-    <tr><td colspan="5">d. Fee Konsultan 3%</td><td style="text-align:right;">Rp {{ number_format($feeKonsultan, 0, ',', '.') }}</td></tr>
-    <tr><td colspan="5">e. Fee Bendera 3%</td><td style="text-align:right;">Rp {{ number_format($feeBendera, 0, ',', '.') }}</td></tr>
-    <tr><td colspan="5">f. Fee Marketing 2%</td><td style="text-align:right;">Rp {{ number_format($feeMarketing, 0, ',', '.') }}</td></tr>
-    <tr><td colspan="5">g. PPh 2.65%</td><td style="text-align:right;">Rp {{ number_format($pph, 0, ',', '.') }}</td></tr>
-    <tr><td colspan="5">h. PPN 11%</td><td style="text-align:right;">Rp {{ number_format($ppn, 0, ',', '.') }}</td></tr>
-    <tr style="background-color: #f8f9fa; font-weight: bold;">
-        <td colspan="5">TOTAL AKHIR (Grand Total)</td>
-        <td style="text-align:right; color: green;">Rp {{ number_format($grandTotalFinal, 0, ',', '.') }}</td>
-    </tr>
+        <tr style="background-color: #f8f9fa; font-weight: bold;">
+            <td style="text-align:left;" colspan="6"></td>
+        </tr>
+        <tr style="background-color: #f8f9fa; font-weight: bold;">
+            <td style="text-align:left;" colspan="5">TOTAL AWAL</td>
+            <td style="text-align:right; color: green;">Rp {{ number_format($grandTotalAll, 0, ',', '.') }}</td>
+        </tr>
+        <tr style="background-color: #f8f9fa; font-weight: bold;">
+            <td style="text-align:left;" colspan="6"></td>
+        </tr>
+        <tr style="background-color: #f8f9fa; font-weight: bold;">
+            <td style="text-align:left;" colspan="6"></td>
+        </tr>
+        <tr><td colspan="5">a. Profit 20%</td><td style="text-align:right;">Rp {{ number_format($profit, 0, ',', '.') }}</td></tr>
+        <tr><td colspan="5">b. Fee Kantor 20%</td><td style="text-align:right;">Rp {{ number_format($feeKantor, 0, ',', '.') }}</td></tr>
+        <tr><td colspan="5">c. Fee Staf 2%</td><td style="text-align:right;">Rp {{ number_format($feeStaf, 0, ',', '.') }}</td></tr>
+        <tr><td colspan="5">d. Fee Konsultan 3%</td><td style="text-align:right;">Rp {{ number_format($feeKonsultan, 0, ',', '.') }}</td></tr>
+        <tr><td colspan="5">e. Fee Bendera 3%</td><td style="text-align:right;">Rp {{ number_format($feeBendera, 0, ',', '.') }}</td></tr>
+        <tr><td colspan="5">f. Fee Marketing 2%</td><td style="text-align:right;">Rp {{ number_format($feeMarketing, 0, ',', '.') }}</td></tr>
+        <tr><td colspan="5">g. PPh 2.65%</td><td style="text-align:right;">Rp {{ number_format($pph, 0, ',', '.') }}</td></tr>
+        <tr><td colspan="5">h. PPN 11%</td><td style="text-align:right;">Rp {{ number_format($ppn, 0, ',', '.') }}</td></tr>
+        <tr style="background-color: #f8f9fa; font-weight: bold;">
+            <td colspan="5">TOTAL AKHIR (Grand Total)</td>
+            <td style="text-align:right; color: green;">Rp {{ number_format($grandTotalFinal, 0, ',', '.') }}</td>
+        </tr>
+    </tbody>
 </table>

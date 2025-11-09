@@ -14,7 +14,7 @@ class BomController extends Controller
 {
     public function index(): Response
     {
-        $bom = Bom::paginate(10);
+        $bom = Bom::all();
         return Inertia::render('pekerjaan/Index', [
             'bom' => $bom
         ]);

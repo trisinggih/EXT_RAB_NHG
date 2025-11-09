@@ -15,6 +15,7 @@ interface Project {
   client_name: string;
   client_id: number;
   description?: string;
+  created_at?: string;
 }
 const props = defineProps<{
   projects: Project[];
@@ -31,31 +32,40 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const source = computed(() => projects.value);
 
+// 🟢 Filter tanggal
+const startDate = ref<string | null>(null);
+const endDate = ref<string | null>(null);
 
-const handleProjectDeletion = (productId: number) => {
-  if (confirm('Are you sure you want to delete this data?')) {
-        router.delete(route('projects.destroy', { id: productId }), {
-            preserveScroll: true,
-            onSuccess: () => {
-                projects.value = projects.value.filter(pkr => pkr.id !== productId)
-            },
-            onError: (err) => {
-                console.error('Gagal menghapus:', err)
-            }
-        });
-    }
+const filterByDate = (items: Project[]) => {
+  if (!startDate.value && !endDate.value) return items;
+  return items.filter((item) => {
+    if (!item.created_at) return false;
+    const date = new Date(item.created_at).setHours(0, 0, 0, 0);
+    const start = startDate.value ? new Date(startDate.value).setHours(0, 0, 0, 0) : null;
+    const end = endDate.value ? new Date(endDate.value).setHours(23, 59, 59, 999) : null;
+    return (!start || date >= start) && (!end || date <= end);
+  });
 };
 
-// Debounced search
+// 🟢 Hapus project
+const handleProjectDeletion = (productId: number) => {
+  if (confirm('Are you sure you want to delete this data?')) {
+    router.delete(route('projects.destroy', { id: productId }), {
+      preserveScroll: true,
+      onSuccess: () => {
+        projects.value = projects.value.filter(pkr => pkr.id !== productId)
+      },
+      onError: (err) => {
+        console.error('Gagal menghapus:', err)
+      }
+    });
+  }
+};
+
+// 🔍 Debounced search
 const searchInput = ref('');
 const search = ref('');
 let timer: ReturnType<typeof setTimeout>;
-
-const tabs = [
-  { key: 'overview', label: 'Overview' },
-  { key: 'users',    label: 'Users' },
-  { key: 'settings', label: 'Settings' },
-];
 
 watch(
   () => searchInput.value,
@@ -78,11 +88,14 @@ const page = ref(1);
 
 const norm = (s: string | number | null | undefined) => (s ?? '').toString().toLowerCase();
 
+// 🔎 Filter pencarian + tanggal
 const filtered = computed(() => {
-  if (!search.value) return source.value;
+  let data = source.value;
+  data = filterByDate(data);
+  if (!search.value) return data;
   const q = norm(search.value);
-  return source.value.filter((u) => {
-    const hay = `${norm(u.id)} ${norm(u.name)} ${norm(u.description)}`;
+  return data.filter((u) => {
+    const hay = `${norm(u.id)} ${norm(u.name)} ${norm(u.description)} ${norm(u.client_name)}`;
     return hay.includes(q);
   });
 });
@@ -100,7 +113,19 @@ const pageItems = computed(() => {
 
 const startIndex = computed(() => Math.min(filtered.value.length, (page.value - 1) * pageSize.value));
 const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value + pageSize.value));
+
+// 🗓️ Format tanggal
+const formatDate = (dateString: string | null) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+};
 </script>
+
 <template>
   <Head title="Projects" />
 
@@ -127,11 +152,19 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
             <option :value="100">100</option>
           </select>
 
-          <Link :href="route('projects.create')"  v-if="user.role_id === 1">
+          <Link :href="route('projects.create')" v-if="user.role_id === 1">
             <button class="btn bg-primary p-2 text-white rounded ml-2">Tambah Projects</button>
           </Link>
         </div>
 
+        <div class="flex gap-3 items-center">
+          <!-- Filter Date Range -->
+          <input type="date" v-model="startDate" class="border border-gray-300 rounded-lg px-2 py-1 text-sm" />
+          <span class="text-gray-500">s/d</span>
+          <input type="date" v-model="endDate" class="border border-gray-300 rounded-lg px-2 py-1 text-sm" />
+        </div>
+
+        <!-- Search -->
         <div class="relative">
           <input
             v-model="searchInput"
@@ -171,6 +204,7 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
               <th class="px-4 py-3 border-b border-gray-200 text-left">Name</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Client</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left">Description</th>
+              <th class="px-4 py-3 border-b border-gray-200 text-left">Dibuat</th>
               <th class="px-4 py-3 border-b border-gray-200 text-left w-[100px]">Action</th>
             </tr>
           </thead>
@@ -181,41 +215,29 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
               class="odd:bg-white even:bg-gray-50 hover:bg-gray-100 transition-colors"
             >
               <td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">{{ startIndex + i + 1 }}</td>
-              <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.name }} 
-              </td>
+              <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.name }}</td>
               <td class="px-4 py-3 border-b border-gray-200 font-medium text-gray-800">{{ u.client_name }}</td>
               <td class="px-4 py-3 border-b border-gray-200">{{ u.description ?? '-' }}</td>
+              <td class="px-4 py-3 border-b border-gray-200">{{ formatDate(u.created_at) }}</td>
               <td class="px-4 py-3 border-b border-gray-200">
-  <div class="flex gap-1">
+                <div class="flex gap-1">
+                  <Link :href="route('projects.upload', { id: u.id })">
+                    <Button class="bg-green-500 text-white">Upload Foto</Button>
+                  </Link>
 
-    <!-- Tampilkan tombol hanya jika role_id = 1 -->
-    
-      <Link :href="route('projects.upload', { id: u.id })">
-        <Button class="bg-green-500 text-white">
-          Upload Foto
-        </Button>
-      </Link>
-<template v-if="user.role_id === 1">
-      <Link :href="route('projects.edit', { id: u.id })">
-        <Button class="bg-yellow-500 text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
-            <path
-              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
-            />
-          </svg>
-        </Button>
-      </Link>
+                  <template v-if="user.role_id === 1">
+                    <Link :href="route('projects.edit', { id: u.id })">
+                      <Button class="bg-yellow-500 text-white">
+                        ✎
+                      </Button>
+                    </Link>
 
-      <Button class="bg-red-600 text-white" @click="handleProjectDeletion(u.id)">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
-          <path d="M6 7h12v2H6zm2 3h8v9H8zm3-6h2v2h-2z" />
-        </svg>
-      </Button>
-    </template>
-
-  </div>
-</td>
-
+                    <Button class="bg-red-600 text-white" @click="handleProjectDeletion(u.id)">
+                      🗑
+                    </Button>
+                  </template>
+                </div>
+              </td>
             </tr>
             <tr v-if="pageItems.length === 0">
               <td colspan="6" class="px-4 py-10 text-center text-gray-400">Tidak ada data yang cocok.</td>

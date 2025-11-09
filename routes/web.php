@@ -71,17 +71,17 @@ Route::middleware(['auth:supplier'])
         Route::get('dashboard', fn() => Inertia::render('DashboardSupplier'))
             ->name('dashboard');
 
-        Route::get('materials', [MaterialController::class, 'Index'])
+        Route::get('materials', [MaterialController::class, 'IndexSup'])
             ->name('materials.index');
-        Route::get('materials/create', [MaterialController::class, 'Create'])
+        Route::get('materials/create', [MaterialController::class, 'CreateSup'])
             ->name('materials.create');
-        Route::post('materials', [MaterialController::class, 'Store'])
+        Route::post('materials', [MaterialController::class, 'StoreSup'])
             ->name('materials.store');
-        Route::get('materials/{material}/edit', [MaterialController::class, 'Edit'])
+        Route::get('materials/{material}/edit', [MaterialController::class, 'EditSup'])
             ->name('materials.edit');
-        Route::put('materials/{material}', [MaterialController::class, 'Update'])
+        Route::put('materials/{material}', [MaterialController::class, 'UpdateSup'])
             ->name('materials.update');
-        Route::delete('materials/{material}', [MaterialController::class, 'Destroy'])
+        Route::delete('materials/{material}', [MaterialController::class, 'DestroySup'])
             ->name('materials.destroy');
 
         Route::post('suppliermaterials', [SupplierController::class, 'storeMaterialsSup'])->name('supplier.material.store');

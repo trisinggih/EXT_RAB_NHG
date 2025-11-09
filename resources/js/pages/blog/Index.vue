@@ -17,7 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const blogs = ref(props.blogs?.data ?? [])
+const blogs = ref(props.blogs ?? [])
 
 onMounted(async () => {
   if (!blogs.value.length) {

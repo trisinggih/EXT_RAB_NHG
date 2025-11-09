@@ -314,42 +314,60 @@ public function export2(Request $request)
     $projectGambar = ProjectGambar::where('project_id', $projectId)->get();
 
     $count = $projectProduct->count();
-    $nextcount = $count + 14;
+    $nextcount = $count;
 
-    // === Export ke Excel dengan 3 sheet identik ===
-    return Excel::download(new class($projectPekerjaan, $projectProduct, $nextcount, $projectGambar) implements WithMultipleSheets {
-        private $projectPekerjaan, $projectProduct, $nextcount, $projectGambar;
+    $countpekerjaan = count($projectPekerjaan);
+    $countdetail = 0;
 
-        public function __construct($projectPekerjaan, $projectProduct, $nextcount, $projectGambar)
+    foreach ($projectPekerjaan as $row) {
+        $details = json_decode($row['detail'], true);
+        if (is_array($details)) {
+            $countdetail += count($details);
+        }
+    }
+
+    return Excel::download(new class($projectPekerjaan, $projectProduct, $nextcount, $projectGambar, $countpekerjaan, $countdetail) implements WithMultipleSheets {
+        private $projectPekerjaan, $projectProduct, $nextcount, $projectGambar, $countpekerjaan, $countdetail;
+
+        public function __construct($projectPekerjaan, $projectProduct, $nextcount, $projectGambar, $countpekerjaan, $countdetail)
         {
             $this->projectPekerjaan = $projectPekerjaan;
             $this->projectProduct = $projectProduct;
             $this->nextcount = $nextcount;
             $this->projectGambar = $projectGambar;
+            $this->countpekerjaan = $countpekerjaan;
+            $this->countdetail = $countdetail;
         }
 
         public function sheets(): array
         {
             $sheets = [];
 
-            // Tambahkan 3 sheet identik
             for ($i = 1; $i <= 3; $i++) {
-                $sheets[] = new class($this->projectPekerjaan, $this->projectProduct, $this->nextcount, $i, $this->projectGambar) implements FromView, WithEvents {
-                    private $projectPekerjaan, $projectProduct, $nextcount, $index, $projectGambar;
+                $sheets[] = new class(
+                    $this->projectPekerjaan,
+                    $this->projectProduct,
+                    $this->nextcount,
+                    $i,
+                    $this->projectGambar,
+                    $this->countpekerjaan,
+                    $this->countdetail
+                ) implements FromView, WithEvents {
+                    private $projectPekerjaan, $projectProduct, $nextcount, $index, $projectGambar, $countpekerjaan, $countdetail;
 
-                    public function __construct($projectPekerjaan, $projectProduct, $nextcount, $index, $projectGambar)
+                    public function __construct($projectPekerjaan, $projectProduct, $nextcount, $index, $projectGambar, $countpekerjaan, $countdetail)
                     {
                         $this->projectPekerjaan = $projectPekerjaan;
                         $this->projectProduct = $projectProduct;
                         $this->nextcount = $nextcount;
                         $this->index = $index;
                         $this->projectGambar = $projectGambar;
-
+                        $this->countpekerjaan = $countpekerjaan;
+                        $this->countdetail = $countdetail;
                     }
 
                     public function view(): \Illuminate\Contracts\View\View
                     {
-                        // Pastikan view sesuai, misal: rab-excel1.blade.php, rab-excel2.blade.php, dst
                         $viewName = "rab-excel{$this->index}";
                         return view($viewName, [
                             'projectPekerjaan' => $this->projectPekerjaan,
@@ -362,63 +380,130 @@ public function export2(Request $request)
                     {
                         return [
                             AfterSheet::class => function (AfterSheet $event) {
-                                $sheet = $event->sheet->getDelegate();
                                 $nextcount = $this->nextcount;
-                               
 
-                                // Format angka jadi teks
-                                $sheet->getStyle('A:F')->getNumberFormat()
-                                    ->setFormatCode(NumberFormat::FORMAT_TEXT);
-
-                                // Lebar kolom
+                                $sheet = $event->sheet->getDelegate();
                                 $sheet->getColumnDimension('A')->setWidth(6);
                                 $sheet->getColumnDimension('B')->setWidth(40);
-                                $sheet->getColumnDimension('C')->setWidth(12);
+                                $sheet->getColumnDimension('C')->setWidth(30);
                                 $sheet->getColumnDimension('D')->setWidth(12);
                                 $sheet->getColumnDimension('E')->setWidth(15);
                                 $sheet->getColumnDimension('F')->setWidth(18);
 
-                                if($this->index != 3){
-                                    // Header utama
+                                if ($this->index != 3) {
                                     $sheet->getStyle('A1:F1')->applyFromArray([
                                         'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
                                         'fill' => [
-                                            'fillType' => Fill::FILL_SOLID,
+                                            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                                             'startColor' => ['rgb' => '1F497D']
                                         ],
                                         'alignment' => [
-                                            'horizontal' => Alignment::HORIZONTAL_CENTER,
-                                            'vertical' => Alignment::VERTICAL_CENTER,
+                                            'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                                            'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                                         ],
                                         'borders' => [
                                             'allBorders' => [
-                                                'borderStyle' => Border::BORDER_THIN,
+                                                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
                                                 'color' => ['rgb' => '000000']
                                             ]
                                         ]
                                     ]);
                                 }
 
-                                // Header kedua
-                                // $sheet->getStyle("A{$nextcount}:F{$nextcount}")->applyFromArray([
-                                //     'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                                //     'fill' => [
-                                //         'fillType' => Fill::FILL_SOLID,
-                                //         'startColor' => ['rgb' => '1F497D']
-                                //     ],
-                                //     'alignment' => [
-                                //         'horizontal' => Alignment::HORIZONTAL_CENTER,
-                                //         'vertical' => Alignment::VERTICAL_CENTER,
-                                //     ],
-                                //     'borders' => [
-                                //         'allBorders' => [
-                                //             'borderStyle' => Border::BORDER_THIN,
-                                //             'color' => ['rgb' => '000000']
-                                //         ]
-                                //     ]
-                                // ]);
+                                if ($this->index == 1) {
+                                    $fillGray = [
+                                        'fill' => [
+                                            'fillType' => Fill::FILL_SOLID,
+                                            'startColor' => ['rgb' => 'E8E8E8'],
+                                        ],
+                                    ];
+                                    $rowAfter10 = $nextcount + 3;
+                                    $sheet->getStyle("A{$rowAfter10}:F{$rowAfter10}")->applyFromArray($fillGray);
+                                    $rowAfter11 = $rowAfter10 + 11;
+                                    $sheet->getStyle("A{$rowAfter11}:F{$rowAfter11}")->applyFromArray($fillGray);
+                                }
 
-                                // Border seluruh tabel
+                                if ($this->index == 2) {
+                                    $currentRow = 2;
+                                    foreach ($this->projectProduct as $product) {
+                                        $sheet->setCellValue("A{$currentRow}", $product->product_name);
+                                        $sheet->mergeCells("A{$currentRow}:F{$currentRow}");
+                                        $sheet->getStyle("A{$currentRow}")->applyFromArray([
+                                            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F81BD']],
+                                        ]);
+                                        $currentRow++;
+
+                                        $totalProduct = 0;
+                                        $pekerjaans = array_filter($this->projectPekerjaan, fn($p) => $p['product_id'] == $product->product_id);
+
+                                        foreach ($pekerjaans as $pk) {
+                                            $sheet->setCellValue("B{$currentRow}", "Pekerjaan: " . $pk['pekerjaan_name']);
+                                            $sheet->getStyle("B{$currentRow}")->applyFromArray([
+                                                'font' => ['bold' => true],
+                                                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D9E1F2']],
+                                            ]);
+                                            $currentRow++;
+
+                                            $details = json_decode($pk['detail'], true) ?? [];
+                                            $subtotalPekerjaan = 0;
+
+                                            foreach ($details as $dt) {
+                                                $jumlah = $dt['total_jumlah'] ?? 0;
+                                                $harga = $dt['total_estimasi_price'] ?? 0;
+                                                $subtotal = $jumlah * $harga;
+                                                $subtotalPekerjaan += $subtotal;
+
+                                               $sheet->setCellValue("C{$currentRow}", $dt['tambahan'] ?? '-');
+
+                                                // Format jumlah, harga, dan subtotal dengan pemisah ribuan
+                                                $jumlah = isset($dt['total_jumlah']) ? (float) $dt['total_jumlah'] : 0;
+                                                $harga = isset($dt['total_estimasi_price']) ? (float) $dt['total_estimasi_price'] : 0;
+                                                $subtotal = $jumlah * $harga;
+
+                                                // Set nilai ke Excel
+                                                $sheet->setCellValue("D{$currentRow}", number_format($jumlah, 0, ',', '.'));
+                                                $sheet->setCellValue("E{$currentRow}", 'Rp ' . number_format($harga, 0, ',', '.'));
+                                                $sheet->setCellValue("F{$currentRow}", 'Rp ' . number_format($subtotal, 0, ',', '.'));
+
+                                                // (Opsional) tambahkan perataan kanan untuk kolom angka
+                                                $sheet->getStyle("D{$currentRow}:F{$currentRow}")
+                                                    ->getAlignment()
+                                                    ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+
+                                                $currentRow++;
+                                            }
+
+                                            // subtotal per pekerjaan
+                                            $sheet->mergeCells("B{$currentRow}:E{$currentRow}");
+                                            $sheet->setCellValue("B{$currentRow}", "Subtotal " . $pk['pekerjaan_name']);
+
+                                            $sheet->setCellValue("F{$currentRow}", 'Rp ' . number_format($subtotalPekerjaan, 0, ',', '.'));
+
+                                            $sheet->getStyle("A{$currentRow}:F{$currentRow}")->applyFromArray([
+                                                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E8E8E8']],
+                                                'font' => ['bold' => true],
+                                            ]);
+                                            $currentRow++;
+
+                                            $totalProduct += $subtotalPekerjaan;
+                                        }
+
+                                        // total per product
+                                        $sheet->mergeCells("A{$currentRow}:E{$currentRow}");
+                                        $sheet->setCellValue("A{$currentRow}", "TOTAL PRODUCT: " . $product->product_name);
+
+                                        $sheet->setCellValue("F{$currentRow}", 'Rp ' . number_format($totalProduct, 0, ',', '.'));
+
+
+                                        $sheet->getStyle("A{$currentRow}:F{$currentRow}")->applyFromArray([
+                                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D0CECE']],
+                                            'font' => ['bold' => true],
+                                        ]);
+                                        $currentRow += 2;
+                                    }
+                                }
+
                                 $highestRow = $sheet->getHighestRow();
                                 $sheet->getStyle("A1:F{$highestRow}")->applyFromArray([
                                     'borders' => [
@@ -428,11 +513,14 @@ public function export2(Request $request)
                                         ]
                                     ]
                                 ]);
-                                $sheet->getStyle("A1:F{$highestRow}")
-                                    ->getAlignment()->setWrapText(true);
 
-                                // Ubah nama sheet
-                                $sheet->setTitle("Sheet {$this->index}");
+                                if ($this->index == 1) {
+                                    $sheet->setTitle("RAB");
+                                } elseif ($this->index == 2) {
+                                    $sheet->setTitle("Analisa Satuan");
+                                } else {
+                                    $sheet->setTitle("Lampiran");
+                                }
                             }
                         ];
                     }
@@ -443,6 +531,11 @@ public function export2(Request $request)
         }
     }, 'RAB-' . now()->format('Ymd_His') . '.xlsx');
 }
+
+
+
+
+
 
 
 

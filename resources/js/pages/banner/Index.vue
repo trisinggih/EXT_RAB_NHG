@@ -17,7 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const banners = ref(props.banners?.data ?? [])
+const banners = ref(props.banners ?? [])
 
 onMounted(async () => {
   if (!banners.value.length) {

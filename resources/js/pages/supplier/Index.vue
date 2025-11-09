@@ -17,7 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const suppliers = ref(props.suppliers?.data ?? [])
+const suppliers = ref(props.suppliers ?? [])
 
 
 const source = computed(() => suppliers.value)
