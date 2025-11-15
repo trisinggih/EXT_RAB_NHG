@@ -173,7 +173,7 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
           </thead>
           <tbody>
             <tr
-              v-for="(u,i) in pageItems"
+               v-for="(u,i) in pageItems.filter(x => x.rab == 4)"
               :key="u.id"
               class="odd:bg-white even:bg-gray-50 hover:bg-gray-100 transition-colors"
             >
@@ -187,7 +187,7 @@ const endIndex = computed(() => Math.min(filtered.value.length, startIndex.value
 
                     <!-- Tampilkan tombol hanya jika role_id = 1 -->
                     
-                     <a :href="`/rab/pdf2?project=${u.id}`" target="_blank">
+                     <a :href="`/rab/pdf2?project=${u.id}&type=Final`" target="_blank">
                         <Button class="bg-green-500 text-white">
                             Download RAB
                         </Button>

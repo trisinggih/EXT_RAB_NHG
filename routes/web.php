@@ -131,7 +131,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('productpekerjaandetail/{id}', [ProductPekerjaanController::class, 'destroyDetail'])->name('productpekerjaan.destroydetail');
     Route::get('productpekerjaan/{id}', [ProductPekerjaanController::class, 'ambil'])->name('productpekerjaan.ambil');
 
-    Route::get('projectproduct/{id}', [ProjectProductController::class, 'ambil'])->name('projectproduct.ambil');
+    Route::get('projectproduct/{id}/{type}', [ProjectProductController::class, 'ambil'])->name('projectproduct.ambil');
 
     Route::get('users', [UserController::class, 'Index'])->name('users.index');
     Route::get('users/create', [UserController::class, 'Create'])->name('users.create');
@@ -213,6 +213,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('materials/{material}/edit', [MaterialController::class, 'Edit'])->name('materials.edit');
     Route::put('materials/{material}', [MaterialController::class, 'Update'])->name('materials.update');
     Route::delete('materials/{material}', [MaterialController::class, 'Destroy'])->name('materials.destroy');
+
+    Route::get('generaterab/{projectid}/{dana}', [AnggaranController::class, 'distribusiDanaUpdate'])->name('generate.index');
 
    
 

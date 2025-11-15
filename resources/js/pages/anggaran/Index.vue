@@ -3,6 +3,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import axios from 'axios';
+import $ from "jquery";
+import "select2";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -134,6 +136,9 @@ const props = defineProps<{
 const projects = ref<Project[]>(props.projects ?? []);
 const pekerjaan = ref<Pekerjaan | null>(props.pekerjaan ?? null);
 const selectedProjectId = ref<number | null>(null);
+const product = ref<Product[]>(props.product ?? []);
+const detailTab = ref<'produk' | 'jasa' | 'manual'>('produk');
+
 
 const selectedProject = computed(() => 
   projects.value.find((p) => p.id === selectedProjectId.value)
@@ -148,18 +153,22 @@ const tabs = [
   { name: 'RAB Final', content: 'Konten untuk tab ketiga tampil di sini.' }
 ];
 
-const selectTab = (index: number) => {
+const selectTab = async (index: number) => {
   selectedTab.value = index;
+
+  await loadProjectData(selectedProjectId.value);
 };
 
 const showAddJobModal = ref(false);
 const showAddProductModal = ref(false);
 const showSupplierModal = ref(false);
+const showIsiData = ref(false);
 const loadProjectData = async (projectId) => {
+   showIsiData.value = false;
   if (!projectId) return;
 
   try {
-    const response = await axios.get(`/projectproduct/${projectId}`);
+    const response = await axios.get(`/projectproduct/${projectId}/${selectedTab.value}`);
     projectproduct.value = response.data.map(item => ({
       ...item,
       detail: item.detail ? JSON.parse(item.detail) : []
@@ -169,6 +178,9 @@ const loadProjectData = async (projectId) => {
       const ids = projectproduct.value.map(p => p.product_id).join(",");
       const response2 = await axios.get(`/productpekerjaan/${ids}`);
       productpekerjaan.value = response2.data;
+
+
+       
     }
 
     const response3 = await axios.get(`/projectpekerjaan/${projectId}`);
@@ -176,6 +188,8 @@ const loadProjectData = async (projectId) => {
       ...item,
       detail: item.detail ? JSON.parse(item.detail) : []
     }));
+
+    showIsiData.value = true;
 
   } catch (err) {
     console.error("Gagal load project data:", err);
@@ -189,13 +203,16 @@ const handleSubmit = () => {
   console.log(form.project_id);
 
   form.post(route('anggaran.pekerjaan'), {
+    preserveScroll: true,
     onSuccess: async () => {
-      showAddJobModal.value = false;
+      // showAddJobModal.value = false;
       form.reset();
       if (selectedProjectId.value) {
         try {
           const response = await axios.get(`/projectpekerjaan/${selectedProjectId.value}`);
           projectPekerjaan.value = response.data;
+          clearFormProduct();
+          showAddJobModal.value = false;
           await loadProjectData(selectedProjectId.value);
         } catch (error) {
           console.error("Gagal refresh project pekerjaan:", error);
@@ -277,9 +294,16 @@ const selectSupplier = async (supplier) => {
 
 const handleSaveDetail = () => {
   formDetail.project_id = selectedProjectId.value;
-  formDetail.pekerjaan_id = selectedPekerjaanId.value;
-  formDetail.product_id = selectedProductId.value;
-  formDetail.rab = detailTab.value;
+  // formDetail.pekerjaan_id = selectedPekerjaanId.value;
+  // formDetail.product_id = selectedProductId.value; 'produk' | 'jasa' | 'manual'
+  if(detailTab.value == 'produk'){
+    formDetail.rab = "Awal";
+  }else if(detailTab.value == 'jasa'){
+    formDetail.rab = "Kedua";
+  }else{
+    formDetail.rab = "Final";
+  }
+  
   formDetail.post(route('anggaran.detail'), {
     onSuccess: async () => {
       showAddDetailModal.value = false;
@@ -361,6 +385,33 @@ const handleApproveRabKedua = async () => {
 };
 
 
+const handleGenerateRAB = async (dana) => {
+  if (!selectedProjectId.value) return;
+
+  // 🔹 Tambahkan pertanyaan konfirmasi sebelum lanjut
+  const confirmed = window.confirm("Apakah Anda yakin ingin generate?");
+  if (!confirmed) {
+    return; // batal jika user menekan Cancel
+  }
+
+  try {
+    // 🔹 Proses approve jika user menekan OK
+    await axios.get(`/generaterab/${selectedProjectId.value}/${dana}`);
+
+    const response = await axios.get(`/projectpekerjaan/${selectedProjectId.value}`);
+    projectPekerjaan.value = response.data;
+
+    // await loadProjectData(selectedProjectId.value);
+
+    alert("✅ RAB Kedua berhasil di-generate!");
+    router.visit(window.location.pathname, { replace: true });
+  } catch (error) {
+    console.error("Gagal approve RAB Kedua:", error);
+    alert("❌ Terjadi kesalahan saat Generate. Silakan coba lagi.");
+  }
+};
+
+
 const handleApproveRabFinal = async () => {
   if (!selectedProjectId.value) return;
 
@@ -417,6 +468,7 @@ const updateDetail = async (detail: any) => {
   formDetail.harga = detail.total_estimasi_price;
   formDetail.qty = detail.total_jumlah;
   formDetail.type = detail.type;
+  formDetail.product_id = detail.product_id;
 
   showAddDetailModal.value = true;
 }
@@ -467,14 +519,11 @@ const deletePekerjaan = async (detailId: number) => {
 
 const showAddDetailModal = ref(false);
 const selectedPekerjaanId = ref<number | null>(null);
-const detailTab = ref<'produk' | 'jasa' | 'manual'>('produk'); // default
+ // default
 
 const downloadRAB = (projectId) => {
   window.location.href = `/projects/${projectId}/export-rab`
 }
-
-
-
 
 
 const terbilang = (angka) => {
@@ -500,67 +549,38 @@ const rabView = ref(null);
 
 
 
-// const downloadRABPDF = (data, product, project) => {
-//   const form = document.createElement('form');
-//   form.method = 'POST';
-//   form.action = '/rab/pdf';
-//   form.target = '_blank';
+const downloadRABPDF = (data, product, project, type) => {
 
-//   // Ambil CSRF token
-//   const meta = document.querySelector('meta[name="csrf-token"]');
-//   if (!meta) {
-//     alert("CSRF token tidak ditemukan. Pastikan meta[name='csrf-token'] ada di layout.");
-//     return;
-//   }
-
-//   const csrf = meta.getAttribute('content');
-//   const csrfInput = document.createElement('input');
-//   csrfInput.type = 'hidden';
-//   csrfInput.name = '_token';
-//   csrfInput.value = csrf;
-//   form.appendChild(csrfInput);
-
-//   // Tambah payload
-//   const input = document.createElement('input');
-//   input.type = 'hidden';
-//   input.name = 'projectPekerjaan';
-//   input.value = JSON.stringify(data);
-//   form.appendChild(input);
-
-//   const input2 = document.createElement('input');
-//   input2.type = 'hidden';
-//   input2.name = 'product';
-//   input2.value = JSON.stringify(product);
-//   form.appendChild(input2);
-
-//   const input3 = document.createElement('input');
-//   input3.type = 'hidden';
-//   input3.name = 'project';
-//   input3.value = JSON.stringify(project);
-//   form.appendChild(input3);
-
-//   document.body.appendChild(form);
-//   form.submit();
-//   document.body.removeChild(form);
-// };
-
-
-const downloadRABPDF = (data, product, project) => {
-  // Encode semua parameter menjadi URI-safe
-  // const params = new URLSearchParams();
-  // params.append('projectPekerjaan', encodeURIComponent(JSON.stringify(data)));
-  // params.append('product', encodeURIComponent(JSON.stringify(product)));
-  // params.append('project', project);
-
-
-  const url = `/rab/pdf2?project=${project}`;
+  const url = `/rab/pdf2?project=${project}&type=${type}`;
   window.open(url, '_blank');
 };
 
-const downloadRABExcel = (data, product, project) => {
-  const url = `/rab/excel2?project=${project}`;
+const downloadRABExcel = (data, product, project, type) => {
+  const url = `/rab/excel2?project=${project}&type=${type}`;
   window.open(url, '_blank');
 };
+
+const productNameInput = ref("");
+
+function updateProductId() {
+  const selected = product.value.find(
+    (p) => p.name.toLowerCase() === productNameInput.value.toLowerCase()
+  );
+  formProduct.product_id = selected ? selected.id : "";
+}
+
+
+function clearFormProduct() {
+  productNameInput.value = "";
+  formProduct.value = {
+    project_id: "",
+    product_id: "",
+    jumlah: "",
+    satuan: "",
+    keterangan: "",
+    processing: false,
+  };
+}
 
 
 </script>
@@ -621,29 +641,60 @@ const downloadRABExcel = (data, product, project) => {
       </div>
 
       <!-- Tab Content -->
-      <div class="py-0">
+      <div class="py-0" id="isidata" v-if="showIsiData">
 
         <!-- RAB 1 -->
 
           <div v-if="selectedTab === 0">
             <div v-if="selectedProject">
-              <div class="alert bg-green-100 w-full mb-5 p-3 rounded" role="alert">
-                <h4 class="font-bold mb-2 text-[16px]">
-                  List Project Pengerjaan (RAB 1)
+              <div class="bg-green-50 border border-green-200 w-full mb-5 p-4 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                  <h4 class="font-bold text-[16px] text-green-800">
+                    List Project Pengerjaan (RAB 1)
+                  </h4>
                   <button
                     v-if="selectedProject.rab === 1"
-                    class="btn bg-primary p-2 text-white mb-2 cursor-pointer float-right"
-                    @click="showAddProductModal = true"
+                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md text-sm font-medium"
+                    @click="showAddProductModal = true; clearFormProduct();"
                   >
                     + Tambah Product
                   </button>
-                </h4>
-                <ol>
-                  <li v-for="value in projectproduct" :key="value.id">
-                    {{ value.product_name }}
-                  </li>
-                </ol>
+                </div>
+
+                <table class="w-full text-sm border-collapse">
+                  <thead>
+                    <tr class="bg-green-200 text-green-900">
+                      <th class="border border-green-300 px-3 py-2 text-left">No</th>
+                      <th class="border border-green-300 px-3 py-2 text-left">Nama Produk</th>
+                      <th class="border border-green-300 px-3 py-2 text-center">Total</th>
+                      <th class="border border-green-300 px-3 py-2 text-center">Jumlah</th>
+                      <th class="border border-green-300 px-3 py-2 text-center">Satuan</th>
+                      <th class="border border-green-300 px-3 py-2 text-center">Grand Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(value, index) in projectproduct"
+                      :key="value.id"
+                      class="hover:bg-green-100 transition"
+                    >
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ index + 1 }}</td>
+                      <td class="border border-green-300 px-3 py-2">{{ value.product_name }}</td>
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ Number(value.total).toLocaleString('id-ID') }}</td>
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ value.jumlah }}</td>
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ value.satuan }}</td>
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ Number(value.grandtotal).toLocaleString('id-ID') }}</td>
+
+                    </tr>
+                    <tr v-if="projectproduct.length === 0">
+                      <td colspan="4" class="border border-green-300 px-3 py-3 text-center text-gray-500 italic">
+                        Belum ada produk ditambahkan.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
+
 
               <div class="w-full grid grid-cols-2">
 
@@ -652,7 +703,7 @@ const downloadRABExcel = (data, product, project) => {
                   <button
                     v-if="selectedProject.rab !== 1"
                     class="btn m-3 bg-yellow-500 p-2 text-white ml-2 mb-4 cursor-pointer w-full float-end"
-                    @click="downloadRABPDF(projectPekerjaan, projectproduct, selectedProjectId)" 
+                    @click="downloadRABPDF(projectPekerjaan, projectproduct, selectedProjectId, 'Awal')" 
                   >
                     <i class="fa-solid fa-download"></i> DOWNLOAD PDF RAB
                   </button>
@@ -663,7 +714,7 @@ const downloadRABExcel = (data, product, project) => {
                   <button
                     v-if="selectedProject.rab !== 1"
                     class="btn m-3 bg-green-500 p-2 text-white ml-2 mb-4 cursor-pointer w-full float-end"
-                     @click="downloadRABExcel(projectPekerjaan, projectproduct, selectedProjectId)" 
+                     @click="downloadRABExcel(projectPekerjaan, projectproduct, selectedProjectId, 'Awal')" 
                   >
                     <i class="fa-solid fa-download"></i> DOWNLOAD EXCEL RAB
                   </button>
@@ -679,31 +730,41 @@ const downloadRABExcel = (data, product, project) => {
               <!-- Jika RAB aktif -->
               <div class="p-0 mt-2" v-if="selectedProject.rab === 1">
                 
-                <button
+              <div
                   v-if="projectproduct.length !== 0"
-                  @click="handleApproveRabAwal"
-                  class="btn bg-yellow-500 p-2 text-white mb-2 cursor-pointer"
+                  class="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded-lg shadow-sm mb-4 animate-fade-in"
                 >
-                  Approve RAB Awal
-                </button>
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none"
+                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M12 9v2m0 4h.01M12 5a7 7 0 00-7 7v5h14v-5a7 7 0 00-7-7z" />
+                      </svg>
+                      <p class="text-yellow-800 font-medium">
+                        Pastikan data RAB Awal sudah benar sebelum melakukan approval.
+                      </p>
+                    </div>
+                    <button
+                      @click="handleApproveRabAwal"
+                      class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-yellow-400"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M5 13l4 4L19 7" />
+                      </svg>
+                      Approve RAB Awal
+                    </button>
+                  </div>
+                </div>
 
-
-                <div  v-for="product in projectproduct" :key="product.id" class="mb-6 mt-2">
+                <div v-for="product in projectproduct" :key="product.id" class="mb-6 mt-0">
                   <h3 class="font-bold text-lg p-3 bg-primary text-white">
                     {{ product.product_name }}
-
-                    <!-- <button
-                      v-if="projectproduct.length !== 0"
-                      class="btn bg-green-500 p-2 text-white float-right cursor-pointer"
-                      style="font-size: 15px;margin-bottom: 10px;margin-top: -4px;"
-                      @click=" () => { form.product_id = product.product_id; form.pekerjaan_id = product.pekerjaan_id; showAddJobModal = true; } "
-                    >
-                      + Tambah Pekerjaan
-                    </button> -->
                   </h3>
 
-
-                    <table
+                  <table
                     class="w-full border-collapse border text-sm"
                     v-for="value in projectPekerjaan.filter(p => p.product_id == product.product_id)"
                     :key="value.pekerjaan_id"
@@ -718,7 +779,8 @@ const downloadRABExcel = (data, product, project) => {
                             class="p-1 btn text-sm bg-primary text-white cursor-pointer"
                             @click="() => { 
                               selectedPekerjaanId = value.pekerjaan_id; 
-                              selectedProductId = value.product_id; 
+                              formDetail.pekerjaan_id = value.pekerjaan_id; 
+                              formDetail.product_id = value.product_id; 
                               showAddDetailModal = true; 
                               detailTab = 'produk'; 
                             }"
@@ -736,7 +798,7 @@ const downloadRABExcel = (data, product, project) => {
 
                       <!-- DETAIL ITEM -->
                       <tr
-                        v-for="dtl in value.detail.filter(d => d.pekerjaan_id == value.pekerjaan_id)"
+                        v-for="dtl in value.detail.filter(d => d.pekerjaan_id == value.pekerjaan_id && d.rab == 'Awal')"
                         :key="dtl.id"
                       >
                         <td class="border px-2 py-2 text-center w-[220px]">
@@ -760,6 +822,7 @@ const downloadRABExcel = (data, product, project) => {
                             x
                           </button>
                         </td>
+
                         <td class="border px-2 py-2 text-center">
                           {{ dtl.tambahan }}
                           <span
@@ -769,57 +832,55 @@ const downloadRABExcel = (data, product, project) => {
                             {{ dtl.supplier_name }}
                           </span>
                         </td>
+
                         <td class="border px-2 py-2 text-center w-[150px]">{{ dtl.satuan }}</td>
+
                         <td class="border px-2 py-2 text-center w-[150px]">
                           {{ formatCurrency(dtl.total_estimasi_price) }}
                         </td>
+
                         <td class="border px-2 py-2 text-center w-[150px]">
                           {{ dtl.total_jumlah }}
                         </td>
+
                         <td class="border px-2 py-2 text-right" colspan="2">
                           {{ formatCurrency(dtl.total_estimasi_price * dtl.total_jumlah) }}
                         </td>
                       </tr>
+
+                      <!-- TOTAL PER PEKERJAAN -->
+                      <tr class="bg-green-100 font-bold">
+                        <td colspan="5" class="border px-2 py-2 text-right">Total Pekerjaan</td>
+                        <td class="border px-2 py-2 text-right">
+                          {{ formatCurrency(
+                            value.detail
+                              .filter(d => d.pekerjaan_id == value.pekerjaan_id && d.rab == 'Awal')
+                              .reduce((sum, d) => sum + (d.total_estimasi_price * d.total_jumlah), 0)
+                          ) }}
+                        </td>
+                      </tr>
+
                     </tbody>
                   </table>
 
-
-
-
+                  <!-- ============================== -->
+                  <!-- 🔥 TOTAL PER PRODUCT DI SINI  -->
+                  <!-- ============================== -->
+                  <div class="text-right font-bold text-lg mt-2 mb-6 bg-blue-50 border p-3 rounded">
+                    Total Product: 
+                    {{ formatCurrency(
+                      projectPekerjaan
+                        .filter(p => p.product_id == product.product_id)
+                        .flatMap(p => p.detail.filter(d => d.rab == 'Awal'))
+                        .reduce((sum, d) => sum + (d.total_estimasi_price * d.total_jumlah), 0)
+                    ) }}
+                  </div>
 
                 </div>
-                
 
 
-                <!-- <div v-if="projectPekerjaan && projectPekerjaan.length > 0" class="mt-6 ">
-                  <table class="w-full text-sm border mt-3">
-                    <tbody>
-                      <tr class="font-bold border-t bg-gray-100">
-                        <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AWAL</td>
-                        <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
-                          {{ formatCurrency(grandTotal) }}
-                        </td>
-                      </tr>
-                      <tr><td class="px-2 py-2 border">a. Profit 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(profit) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">b. Fee Kantor 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKantor) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">c. Fee Staf 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeStaf) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">d. Fee Konsultan 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKonsultan) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">e. Fee Bendera 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeBendera) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">f. Fee Marketing 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeMarketing) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">g. PPh 2.65%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(pph) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">h. PPN 11%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(ppn) }}</td></tr>
-                      <tr class="font-bold border-t bg-gray-100">
-                        <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AKHIR (Grand Total)</td>
-                        <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
-                          {{ formatCurrency(grandTotalFinal) }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  
-                      
-                  
-                  </table>
-                </div> -->
+
+
               </div>
 
 
@@ -832,8 +893,7 @@ const downloadRABExcel = (data, product, project) => {
                     {{ product.product_name }}
                   </h3>
 
-
-                    <table
+                  <table
                     class="w-full border-collapse border text-sm"
                     v-for="value in projectPekerjaan.filter(p => p.product_id == product.product_id)"
                     :key="value.pekerjaan_id"
@@ -843,12 +903,11 @@ const downloadRABExcel = (data, product, project) => {
                         <td colspan="6" class="border px-2 py-1 text-left font-bold">
                           {{ value.pekerjaan_name }}
                         </td>
-           
                       </tr>
 
                       <!-- DETAIL ITEM -->
                       <tr
-                        v-for="dtl in value.detail.filter(d => d.pekerjaan_id == value.pekerjaan_id)"
+                        v-for="dtl in value.detail.filter(d => d.pekerjaan_id == value.pekerjaan_id && d.rab == 'Awal')"
                         :key="dtl.id"
                       >
 
@@ -861,60 +920,61 @@ const downloadRABExcel = (data, product, project) => {
                             {{ dtl.supplier_name }}
                           </span>
                         </td>
-                        <td class="border px-2 py-2 text-center w-[150px]">{{ dtl.satuan }}</td>
+
+                        <td class="border px-2 py-2 text-center w-[150px]">
+                          {{ dtl.satuan }}
+                        </td>
+
                         <td class="border px-2 py-2 text-center w-[150px]">
                           {{ formatCurrency(dtl.total_estimasi_price) }}
                         </td>
+
                         <td class="border px-2 py-2 text-center w-[150px]">
                           {{ dtl.total_jumlah }}
                         </td>
+
                         <td class="border px-2 py-2 text-right" colspan="2">
                           {{ formatCurrency(dtl.total_estimasi_price * dtl.total_jumlah) }}
                         </td>
                       </tr>
+
+                      <!-- ================================= -->
+                      <!-- 🔥 TOTAL PER PEKERJAAN -->
+                      <!-- ================================= -->
+                      <tr class="bg-green-100 font-bold">
+                        <td colspan="5" class="border px-2 py-2 text-right">
+                          Total Pekerjaan
+                        </td>
+                        <td class="border px-2 py-2 text-right">
+                          {{ formatCurrency(
+                            value.detail
+                              .filter(d => d.pekerjaan_id == value.pekerjaan_id && d.rab == 'Awal')
+                              .reduce((sum, d) => sum + (d.total_estimasi_price * d.total_jumlah), 0)
+                          ) }}
+                        </td>
+                      </tr>
+
                     </tbody>
                   </table>
 
-
-
-
+                  <!-- =================================== -->
+                  <!-- 🔥 TOTAL PER PRODUCT -->
+                  <!-- =================================== -->
+                  <div class="text-right font-bold text-lg mt-2 mb-6 bg-blue-50 border p-3 rounded">
+                    Total Product:
+                    {{ formatCurrency(
+                      projectPekerjaan
+                        .filter(p => p.product_id == product.product_id)
+                        .flatMap(p => p.detail.filter(d => d.rab == 'Awal'))
+                        .reduce((sum, d) => sum + (d.total_estimasi_price * d.total_jumlah), 0)
+                    ) }}
+                  </div>
 
                 </div>
 
-                <!-- TOTAL DAN RINCIAN -->
-                <!-- <div v-if="projectPekerjaan && projectPekerjaan.length > 0" class="mt-6 border-t pt-4">
-         
-
-                  <table class="w-full text-sm border mt-3">
-                    <tbody>
-                      <tr class="font-bold border-t bg-gray-100">
-                        <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AWAL</td>
-                        <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
-                          {{ formatCurrency(grandTotal) }}
-                        </td>
-                      </tr>
-                      <tr><td class="px-2 py-2 border">a. Profit 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(profit) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">b. Fee Kantor 20%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKantor) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">c. Fee Staf 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeStaf) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">d. Fee Konsultan 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeKonsultan) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">e. Fee Bendera 3%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeBendera) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">f. Fee Marketing 2%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(feeMarketing) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">g. PPh 2.65%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(pph) }}</td></tr>
-                      <tr><td class="px-2 py-2 border">h. PPN 11%</td><td class="px-2 py-2 text-right border">{{ formatCurrency(ppn) }}</td></tr>
-                      <tr class="font-bold border-t bg-gray-100">
-                        <td class="px-2 py-2 text-left  font-semibold text-lg">TOTAL AKHIR (Grand Total)</td>
-                        <td class="px-2 py-2 text-right text-green-700  font-semibold text-lg">
-                          {{ formatCurrency(grandTotalFinal) }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  
-                      
-                  
-                  </table>
 
 
-                </div> -->
+
               </div>
 
 
@@ -935,16 +995,45 @@ const downloadRABExcel = (data, product, project) => {
 
           <div v-if="selectedTab === 1">
 
-            <div class="alert bg-green-100 w-full mb-5 p-3 rounded" role="alert">
-                <h4 class="font-bold mb-2 text-[16px]">
+            <div class="bg-green-50 border border-green-200 w-full mb-5 p-4 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                  <h4 class="font-bold text-[16px] text-green-800">
                     List Project Pengerjaan (RAB 2)
-                        
                   </h4>
-                  <ol>
-                          <li v-for="value in projectproduct" :key="value.id">
-                            {{ value.product_name  }}
-                          </li>
-                    </ol>
+                </div>
+
+                <table class="w-full text-sm border-collapse">
+                  <thead>
+                    <tr class="bg-green-200 text-green-900">
+                     <th class="border border-green-300 px-3 py-2 text-left">No</th>
+                      <th class="border border-green-300 px-3 py-2 text-left">Nama Produk</th>
+                      <th class="border border-green-300 px-3 py-2 text-center">Total</th>
+                      <th class="border border-green-300 px-3 py-2 text-center">Jumlah</th>
+                      <th class="border border-green-300 px-3 py-2 text-center">Satuan</th>
+                      <th class="border border-green-300 px-3 py-2 text-center">Grand Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(value, index) in projectproduct"
+                      :key="value.id"
+                      class="hover:bg-green-100 transition"
+                    >
+                       <td class="border border-green-300 px-3 py-2 text-center">{{ index + 1 }}</td>
+                      <td class="border border-green-300 px-3 py-2">{{ value.product_name }}</td>
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ Number(value.total).toLocaleString('id-ID') }}</td>
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ value.jumlah }}</td>
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ value.satuan }}</td>
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ Number(value.grandtotal).toLocaleString('id-ID') }}</td>
+
+                    </tr>
+                    <tr v-if="projectproduct.length === 0">
+                      <td colspan="4" class="border border-green-300 px-3 py-3 text-center text-gray-500 italic">
+                        Belum ada produk ditambahkan.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
 
               
@@ -954,28 +1043,53 @@ const downloadRABExcel = (data, product, project) => {
                   <!-- Jika RAB aktif -->
                   <div class="p-0" v-if="selectedProject.rab === 2">
 
+                    
+                    
+
+                <div
+                  v-if="projectproduct.length !== 0"
+                  class="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded-lg shadow-sm mb-4 animate-fade-in"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none"
+                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M12 9v2m0 4h.01M12 5a7 7 0 00-7 7v5h14v-5a7 7 0 00-7-7z" />
+                      </svg>
+                      <p class="text-yellow-800 font-medium">
+                        Pastikan data RAB Kedua sudah benar sebelum melakukan approval.
+                      </p>
+                    </div>
                     <button
-                      v-if="projectproduct.length !== 0"
                       @click="handleApproveRabKedua"
-                      class="btn bg-yellow-500 p-2 text-white mb-2 cursor-pointer"
+                      class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-yellow-400"
                     >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M5 13l4 4L19 7" />
+                      </svg>
                       Approve RAB Kedua
                     </button>
 
+                     <button
+                      @click="handleGenerateRAB(5000000)"
+                      class="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-yellow-400"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M5 13l4 4L19 7" />
+                      </svg>
+                      Generate RAB
+                    </button>
+                  </div>
+                </div>
 
                   <div  v-for="product in projectproduct" :key="product.id" class="mb-6 mt-2">
                     <h3 class="font-bold text-lg p-3 bg-primary text-white">
                       {{ product.product_name }}
-
-                      <!-- <button
-                      v-if="projectproduct.length !== 0"
-                      class="btn bg-green-500 p-2 text-white float-right cursor-pointer"
-                      style="font-size: 15px;margin-bottom: 10px;margin-top: -4px;"
-                      @click=" () => { form.product_id = product.product_id; form.pekerjaan_id = product.pekerjaan_id; showAddJobModal = true; } "
-                    >
-                      + Tambah Pekerjaan
-                    </button> -->
-
                     </h3>
 
 
@@ -984,6 +1098,7 @@ const downloadRABExcel = (data, product, project) => {
                       v-for="value in projectPekerjaan.filter(p => p.product_id == product.product_id)"
                       :key="value.pekerjaan_id"
                     >
+                    
                       <tbody>
                         <tr style="background-color: antiquewhite;">
                           <td colspan="5" class="border px-2 py-1 text-left font-bold">
@@ -994,8 +1109,10 @@ const downloadRABExcel = (data, product, project) => {
                               class="p-1 btn text-sm bg-primary text-white cursor-pointer"
                               @click="() => { 
                                 selectedPekerjaanId = value.pekerjaan_id; 
+                                formDetail.pekerjaan_id = value.pekerjaan_id; 
+                                formDetail.product_id = value.product_id; 
                                 showAddDetailModal = true; 
-                                detailTab = 'produk'; 
+                                detailTab = 'jasa'; 
                               }"
                             >
                               Tambah Detail
@@ -1011,52 +1128,83 @@ const downloadRABExcel = (data, product, project) => {
 
                         <!-- DETAIL ITEM -->
                         <tr
-                          v-for="dtl in value.detail.filter(d => d.pekerjaan_id == value.pekerjaan_id)"
-                          :key="dtl.id"
-                        >
-                          <td class="border px-2 py-2 text-center w-[220px]">
-                            <button
-                              v-if="dtl.material_id !== null"
-                              class="btn btn-sm bg-yellow-600 text-white px-2 cursor-pointer mr-2"
-                              @click="infoSupplier(dtl.material_id)"
-                            >
-                              Info Supplier
-                            </button>
-                            <button
-                              class="btn btn-sm bg-green-600 text-white px-2 cursor-pointer mr-2"
-                              @click="updateDetail(dtl)"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              class="btn btn-sm bg-red-600 text-white px-2 cursor-pointer"
-                              @click="deleteDetail(dtl.tambahan)"
-                            >
-                              x
-                            </button>
-                          </td>
-                          <td class="border px-2 py-2 text-center">
-                            {{ dtl.tambahan }}
-                            <span
-                              v-if="dtl.supplier_name"
-                              class="ml-2 inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full"
-                            >
-                              {{ dtl.supplier_name }}
-                            </span>
-                          </td>
-                          <td class="border px-2 py-2 text-center w-[150px]">{{ dtl.satuan }}</td>
-                          <td class="border px-2 py-2 text-center w-[150px]">
-                            {{ formatCurrency(dtl.total_estimasi_price) }}
-                          </td>
-                          <td class="border px-2 py-2 text-center w-[150px]">
-                            {{ dtl.total_jumlah }}
-                          </td>
-                          <td class="border px-2 py-2 text-right" colspan="2">
-                            {{ formatCurrency(dtl.total_estimasi_price * dtl.total_jumlah) }}
-                          </td>
-                        </tr>
+                        v-for="dtl in value.detail.filter(d => d.pekerjaan_id == value.pekerjaan_id && d.rab == 'Awal')"
+                        :key="dtl.id"
+                      >
+                        <td class="border px-2 py-2 text-center w-[220px]">
+                          <button
+                            v-if="dtl.material_id !== null"
+                            class="btn btn-sm bg-yellow-600 text-white px-2 cursor-pointer mr-2"
+                            @click="infoSupplier(dtl.material_id, dtl.pekerjaan_id, dtl.product_id)"
+                          >
+                            Info Supplier
+                          </button>
+                          <button
+                            class="btn btn-sm bg-green-600 text-white px-2 cursor-pointer mr-2"
+                            @click="updateDetail(dtl)"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            class="btn btn-sm bg-red-600 text-white px-2 cursor-pointer"
+                            @click="deleteDetail(dtl.tambahan)"
+                          >
+                            x
+                          </button>
+                        </td>
+
+                        <td class="border px-2 py-2 text-center">
+                          {{ dtl.tambahan }}
+                          <span
+                            v-if="dtl.supplier_name"
+                            class="ml-2 inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full"
+                          >
+                            {{ dtl.supplier_name }}
+                          </span>
+                        </td>
+
+                        <td class="border px-2 py-2 text-center w-[150px]">{{ dtl.satuan }}</td>
+
+                        <td class="border px-2 py-2 text-center w-[150px]">
+                          {{ formatCurrency(dtl.total_estimasi_price) }}
+                        </td>
+
+                        <td class="border px-2 py-2 text-center w-[150px]">
+                          {{ dtl.total_jumlah }}
+                        </td>
+
+                        <td class="border px-2 py-2 text-right" colspan="2">
+                          {{ formatCurrency(dtl.total_estimasi_price * dtl.total_jumlah) }}
+                        </td>
+                      </tr>
+
+                      <!-- TOTAL PER PEKERJAAN -->
+                      <tr class="bg-green-100 font-bold">
+                        <td colspan="5" class="border px-2 py-2 text-right">Total Pekerjaan</td>
+                        <td class="border px-2 py-2 text-right">
+                          {{ formatCurrency(
+                            value.detail
+                              .filter(d => d.pekerjaan_id == value.pekerjaan_id && d.rab == 'Kedua')
+                              .reduce((sum, d) => sum + (d.total_estimasi_price * d.total_jumlah), 0)
+                          ) }}
+                        </td>
+                      </tr>
+
                       </tbody>
                     </table>
+
+                  <!-- ============================== -->
+                  <!-- 🔥 TOTAL PER PRODUCT DI SINI  -->
+                  <!-- ============================== -->
+                  <div class="text-right font-bold text-lg mt-2 mb-6 bg-blue-50 border p-3 rounded">
+                    Total Product: 
+                    {{ formatCurrency(
+                      projectPekerjaan
+                        .filter(p => p.product_id == product.product_id)
+                        .flatMap(p => p.detail.filter(d => d.rab == 'Kedua'))
+                        .reduce((sum, d) => sum + (d.total_estimasi_price * d.total_jumlah), 0)
+                    ) }}
+                  </div>
 
 
 
@@ -1077,7 +1225,7 @@ const downloadRABExcel = (data, product, project) => {
                     <button
                       v-if="selectedProject.rab !== 1"
                       class="btn m-3 bg-yellow-500 p-2 text-white ml-2 mb-4 cursor-pointer w-full float-end"
-                      @click="downloadRABPDF(projectPekerjaan, projectproduct, selectedProjectId)" 
+                      @click="downloadRABPDF(projectPekerjaan, projectproduct, selectedProjectId, 'Kedua')" 
                     >
                       <i class="fa-solid fa-download"></i> DOWNLOAD PDF RAB
                     </button>
@@ -1088,7 +1236,7 @@ const downloadRABExcel = (data, product, project) => {
                     <button
                       v-if="selectedProject.rab !== 1"
                       class="btn m-3 bg-green-500 p-2 text-white ml-2 mb-4 cursor-pointer w-full float-end"
-                      @click="downloadRABExcel(projectPekerjaan, projectproduct, selectedProjectId )" 
+                      @click="downloadRABExcel(projectPekerjaan, projectproduct, selectedProjectId, 'Kedua' )" 
                     >
                       <i class="fa-solid fa-download"></i> DOWNLOAD EXCEL RAB
                     </button>
@@ -1109,10 +1257,10 @@ const downloadRABExcel = (data, product, project) => {
 
 
                       <table
-                      class="w-full border-collapse border text-sm"
-                      v-for="value in projectPekerjaan.filter(p => p.product_id == product.product_id)"
-                      :key="value.pekerjaan_id"
-                    >
+                        class="w-full border-collapse border text-sm"
+                        v-for="value in projectPekerjaan.filter(p => p.product_id == product.product_id)"
+                        :key="value.pekerjaan_id"
+                      >
                       <tbody>
                         <tr style="background-color: antiquewhite;">
                           <td colspan="6" class="border px-2 py-1 text-left font-bold">
@@ -1122,37 +1270,69 @@ const downloadRABExcel = (data, product, project) => {
                         </tr>
 
                         <!-- DETAIL ITEM -->
-                        <tr
-                          v-for="dtl in value.detail.filter(d => d.pekerjaan_id == value.pekerjaan_id)"
-                          :key="dtl.id"
-                        >
+                    <tr
+                        v-for="dtl in value.detail.filter(d => d.pekerjaan_id == value.pekerjaan_id && d.rab == 'Kedua')"
+                        :key="dtl.id"
+                      >
 
-                          <td colspan="2" class="border px-2 py-2 text-center" style="width: 40%;">
-  {{ dtl.tambahan }}
-  <span
-    v-if="dtl.supplier_name"
-    class="ml-2 inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full"
-  >
-    {{ dtl.supplier_name }}
-  </span>
-</td>
-                          <td class="border px-2 py-2 text-center w-[150px]">{{ dtl.satuan }}</td>
-                          <td class="border px-2 py-2 text-center w-[150px]">
-                            {{ formatCurrency(dtl.total_estimasi_price) }}
-                          </td>
-                          <td class="border px-2 py-2 text-center w-[150px]">
-                            {{ dtl.total_jumlah }}
-                          </td>
-                          <td class="border px-2 py-2 text-right" colspan="2">
-                            {{ formatCurrency(dtl.total_estimasi_price * dtl.total_jumlah) }}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                        <td colspan="2" class="border px-2 py-2 text-center" style="width: 40%;">
+                          {{ dtl.tambahan }}
+                          <span
+                            v-if="dtl.supplier_name"
+                            class="ml-2 inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full"
+                          >
+                            {{ dtl.supplier_name }}
+                          </span>
+                        </td>
 
+                        <td class="border px-2 py-2 text-center w-[150px]">
+                          {{ dtl.satuan }}
+                        </td>
 
+                        <td class="border px-2 py-2 text-center w-[150px]">
+                          {{ formatCurrency(dtl.total_estimasi_price) }}
+                        </td>
 
+                        <td class="border px-2 py-2 text-center w-[150px]">
+                          {{ dtl.total_jumlah }}
+                        </td>
 
+                        <td class="border px-2 py-2 text-right" colspan="2">
+                          {{ formatCurrency(dtl.total_estimasi_price * dtl.total_jumlah) }}
+                        </td>
+                      </tr>
+
+                      <!-- ================================= -->
+                      <!-- 🔥 TOTAL PER PEKERJAAN -->
+                      <!-- ================================= -->
+                      <tr class="bg-green-100 font-bold">
+                        <td colspan="5" class="border px-2 py-2 text-right">
+                          Total Pekerjaan
+                        </td>
+                        <td class="border px-2 py-2 text-right">
+                          {{ formatCurrency(
+                            value.detail
+                              .filter(d => d.pekerjaan_id == value.pekerjaan_id && d.rab == 'Kedua')
+                              .reduce((sum, d) => sum + (d.total_estimasi_price * d.total_jumlah), 0)
+                          ) }}
+                        </td>
+                      </tr>
+
+                    </tbody>
+                  </table>
+
+                  <!-- =================================== -->
+                  <!-- 🔥 TOTAL PER PRODUCT -->
+                  <!-- =================================== -->
+                  <div class="text-right font-bold text-lg mt-2 mb-6 bg-blue-50 border p-3 rounded">
+                    Total Product:
+                    {{ formatCurrency(
+                      projectPekerjaan
+                        .filter(p => p.product_id == product.product_id)
+                        .flatMap(p => p.detail.filter(d => d.rab == 'Kedua'))
+                        .reduce((sum, d) => sum + (d.total_estimasi_price * d.total_jumlah), 0)
+                    ) }}
+                  </div>
 
                   </div>
 
@@ -1175,16 +1355,45 @@ const downloadRABExcel = (data, product, project) => {
 
           <div v-if="selectedTab === 2">
 
-            <div class="alert bg-green-100 w-full mb-5 p-3 rounded" role="alert">
-                <h4 class="font-bold mb-2 text-[16px]">
+            <div class="bg-green-50 border border-green-200 w-full mb-5 p-4 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                  <h4 class="font-bold text-[16px] text-green-800">
                     List Project Pengerjaan (RAB 3)
-                        
                   </h4>
-                  <ol>
-                          <li v-for="value in projectproduct" :key="value.id">
-                            {{ value.product_name  }}
-                          </li>
-                    </ol>
+                </div>
+
+                <table class="w-full text-sm border-collapse">
+                  <thead>
+                    <tr class="bg-green-200 text-green-900">
+                     <th class="border border-green-300 px-3 py-2 text-left">No</th>
+                      <th class="border border-green-300 px-3 py-2 text-left">Nama Produk</th>
+                      <th class="border border-green-300 px-3 py-2 text-center">Total</th>
+                      <th class="border border-green-300 px-3 py-2 text-center">Jumlah</th>
+                      <th class="border border-green-300 px-3 py-2 text-center">Satuan</th>
+                      <th class="border border-green-300 px-3 py-2 text-center">Grand Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(value, index) in projectproduct"
+                      :key="value.id"
+                      class="hover:bg-green-100 transition"
+                    >
+                       <td class="border border-green-300 px-3 py-2 text-center">{{ index + 1 }}</td>
+                      <td class="border border-green-300 px-3 py-2">{{ value.product_name }}</td>
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ Number(value.total).toLocaleString('id-ID') }}</td>
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ value.jumlah }}</td>
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ value.satuan }}</td>
+                      <td class="border border-green-300 px-3 py-2 text-center">{{ Number(value.grandtotal).toLocaleString('id-ID') }}</td>
+
+                    </tr>
+                    <tr v-if="projectproduct.length === 0">
+                      <td colspan="4" class="border border-green-300 px-3 py-3 text-center text-gray-500 italic">
+                        Belum ada produk ditambahkan.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
 
               
@@ -1194,13 +1403,43 @@ const downloadRABExcel = (data, product, project) => {
                   <!-- Jika RAB aktif -->
                   <div class="p-0" v-if="selectedProject.rab === 3">
               
-                    <button
+                    <!-- <button
                       v-if="projectproduct.length !== 0"
                       @click="handleApproveRabFinal"
                       class="btn bg-yellow-500 p-2 text-white ml-2 mb-2 cursor-pointer"
                     >
                       Approve RAB Final
+                    </button> -->
+
+                <div
+                  v-if="projectproduct.length !== 0"
+                  class="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded-lg shadow-sm mb-4 animate-fade-in"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none"
+                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M12 9v2m0 4h.01M12 5a7 7 0 00-7 7v5h14v-5a7 7 0 00-7-7z" />
+                      </svg>
+                      <p class="text-yellow-800 font-medium">
+                        Pastikan data RAB Final sudah benar sebelum melakukan approval.
+                      </p>
+                    </div>
+                    <button
+                      @click="handleApproveRabFinal"
+                      class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-yellow-400"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M5 13l4 4L19 7" />
+                      </svg>
+                      Approve RAB Final
                     </button>
+                  </div>
+                </div>
+
 
 
                   <div  v-for="product in projectproduct" :key="product.id" class="mb-6 mt-2">
@@ -1232,8 +1471,10 @@ const downloadRABExcel = (data, product, project) => {
                               class="p-1 btn text-sm bg-primary text-white cursor-pointer"
                               @click="() => { 
                                 selectedPekerjaanId = value.pekerjaan_id; 
+                                formDetail.pekerjaan_id = value.pekerjaan_id; 
+                                formDetail.product_id = value.product_id; 
                                 showAddDetailModal = true; 
-                                detailTab = 'produk'; 
+                                detailTab = 'lain'; 
                               }"
                             >
                               Tambah Detail
@@ -1248,53 +1489,84 @@ const downloadRABExcel = (data, product, project) => {
                         </tr>
 
                         <!-- DETAIL ITEM -->
-                        <tr
-                          v-for="dtl in value.detail.filter(d => d.pekerjaan_id == value.pekerjaan_id)"
-                          :key="dtl.id"
-                        >
-                          <td class="border px-2 py-2 text-center w-[220px]">
-                            <button
-                              v-if="dtl.material_id !== null"
-                              class="btn btn-sm bg-yellow-600 text-white px-2 cursor-pointer mr-2"
-                              @click="infoSupplier(dtl.material_id)"
-                            >
-                              Info Supplier
-                            </button>
-                            <button
-                              class="btn btn-sm bg-green-600 text-white px-2 cursor-pointer mr-2"
-                              @click="updateDetail(dtl)"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              class="btn btn-sm bg-red-600 text-white px-2 cursor-pointer"
-                              @click="deleteDetail(dtl.tambahan)"
-                            >
-                              x
-                            </button>
-                          </td>
-                          <td class="border px-2 py-2 text-center">
-  {{ dtl.tambahan }}
-  <span
-    v-if="dtl.supplier_name"
-    class="ml-2 inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full"
-  >
-    {{ dtl.supplier_name }}
-  </span>
-</td>
-                          <td class="border px-2 py-2 text-center w-[150px]">{{ dtl.satuan }}</td>
-                          <td class="border px-2 py-2 text-center w-[150px]">
-                            {{ formatCurrency(dtl.total_estimasi_price) }}
-                          </td>
-                          <td class="border px-2 py-2 text-center w-[150px]">
-                            {{ dtl.total_jumlah }}
-                          </td>
-                          <td class="border px-2 py-2 text-right" colspan="2">
-                            {{ formatCurrency(dtl.total_estimasi_price * dtl.total_jumlah) }}
-                          </td>
-                        </tr>
+                         <tr
+                        v-for="dtl in value.detail.filter(d => d.pekerjaan_id == value.pekerjaan_id && d.rab == 'Final')"
+                        :key="dtl.id"
+                      >
+                        <td class="border px-2 py-2 text-center w-[220px]">
+                          <button
+                            v-if="dtl.material_id !== null"
+                            class="btn btn-sm bg-yellow-600 text-white px-2 cursor-pointer mr-2"
+                            @click="infoSupplier(dtl.material_id, dtl.pekerjaan_id, dtl.product_id)"
+                          >
+                            Info Supplier
+                          </button>
+                          <button
+                            class="btn btn-sm bg-green-600 text-white px-2 cursor-pointer mr-2"
+                            @click="updateDetail(dtl)"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            class="btn btn-sm bg-red-600 text-white px-2 cursor-pointer"
+                            @click="deleteDetail(dtl.tambahan)"
+                          >
+                            x
+                          </button>
+                        </td>
+
+                        <td class="border px-2 py-2 text-center">
+                          {{ dtl.tambahan }}
+                          <span
+                            v-if="dtl.supplier_name"
+                            class="ml-2 inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full"
+                          >
+                            {{ dtl.supplier_name }}
+                          </span>
+                        </td>
+
+                        <td class="border px-2 py-2 text-center w-[150px]">{{ dtl.satuan }}</td>
+
+                        <td class="border px-2 py-2 text-center w-[150px]">
+                          {{ formatCurrency(dtl.total_estimasi_price) }}
+                        </td>
+
+                        <td class="border px-2 py-2 text-center w-[150px]">
+                          {{ dtl.total_jumlah }}
+                        </td>
+
+                        <td class="border px-2 py-2 text-right" colspan="2">
+                          {{ formatCurrency(dtl.total_estimasi_price * dtl.total_jumlah) }}
+                        </td>
+                      </tr>
+
+                      <!-- TOTAL PER PEKERJAAN -->
+                      <tr class="bg-green-100 font-bold">
+                        <td colspan="5" class="border px-2 py-2 text-right">Total Pekerjaan</td>
+                        <td class="border px-2 py-2 text-right">
+                          {{ formatCurrency(
+                            value.detail
+                              .filter(d => d.pekerjaan_id == value.pekerjaan_id && d.rab == 'Final')
+                              .reduce((sum, d) => sum + (d.total_estimasi_price * d.total_jumlah), 0)
+                          ) }}
+                        </td>
+                      </tr>
+
                       </tbody>
                     </table>
+
+                  <!-- ============================== -->
+                  <!-- 🔥 TOTAL PER PRODUCT DI SINI  -->
+                  <!-- ============================== -->
+                  <div class="text-right font-bold text-lg mt-2 mb-6 bg-blue-50 border p-3 rounded">
+                    Total Product: 
+                    {{ formatCurrency(
+                      projectPekerjaan
+                        .filter(p => p.product_id == product.product_id)
+                        .flatMap(p => p.detail.filter(d => d.rab == 'Final'))
+                        .reduce((sum, d) => sum + (d.total_estimasi_price * d.total_jumlah), 0)
+                    ) }}
+                  </div>
 
 
 
@@ -1315,7 +1587,7 @@ const downloadRABExcel = (data, product, project) => {
                     <button
                       v-if="selectedProject.rab !== 1"
                       class="btn m-3 bg-yellow-500 p-2 text-white ml-2 mb-4 cursor-pointer w-full float-end"
-                      @click="downloadRABPDF(projectPekerjaan, projectproduct, selectedProjectId)" 
+                      @click="downloadRABPDF(projectPekerjaan, projectproduct, selectedProjectId, 'Final')" 
                     >
                       <i class="fa-solid fa-download"></i> DOWNLOAD PDF RAB
                     </button>
@@ -1326,7 +1598,7 @@ const downloadRABExcel = (data, product, project) => {
                     <button
                       v-if="selectedProject.rab !== 1"
                       class="btn m-3 bg-green-500 p-2 text-white ml-2 mb-4 cursor-pointer w-full float-end"
-                      @click="downloadRABExcel(projectPekerjaan, projectproduct, selectedProjectId)" 
+                      @click="downloadRABExcel(projectPekerjaan, projectproduct, selectedProjectId, 'Final')" 
                     >
                       <i class="fa-solid fa-download"></i> DOWNLOAD EXCEL RAB
                     </button>
@@ -1361,33 +1633,68 @@ const downloadRABExcel = (data, product, project) => {
 
                         <!-- DETAIL ITEM -->
                         <tr
-                          v-for="dtl in value.detail.filter(d => d.pekerjaan_id == value.pekerjaan_id)"
-                          :key="dtl.id"
-                        >
+                        v-for="dtl in value.detail.filter(d => d.pekerjaan_id == value.pekerjaan_id && d.rab == 'Final')"
+                        :key="dtl.id"
+                      >
 
-                          <td colspan="2" class="border px-2 py-2 text-center" style="width: 40%;">
-  {{ dtl.tambahan }}
-  <span
-    v-if="dtl.supplier_name"
-    class="ml-2 inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full"
-  >
-    {{ dtl.supplier_name }}
-  </span>
-</td>
-                          <td class="border px-2 py-2 text-center w-[150px]">{{ dtl.satuan }}</td>
-                          <td class="border px-2 py-2 text-center w-[150px]">
-                            {{ formatCurrency(dtl.total_estimasi_price) }}
-                          </td>
-                          <td class="border px-2 py-2 text-center w-[150px]">
-                            {{ dtl.total_jumlah }}
-                          </td>
-                          <td class="border px-2 py-2 text-right" colspan="2">
-                            {{ formatCurrency(dtl.total_estimasi_price * dtl.total_jumlah) }}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                        <td colspan="2" class="border px-2 py-2 text-center" style="width: 40%;">
+                          {{ dtl.tambahan }}
+                          <span
+                            v-if="dtl.supplier_name"
+                            class="ml-2 inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full"
+                          >
+                            {{ dtl.supplier_name }}
+                          </span>
+                        </td>
 
+                        <td class="border px-2 py-2 text-center w-[150px]">
+                          {{ dtl.satuan }}
+                        </td>
+
+                        <td class="border px-2 py-2 text-center w-[150px]">
+                          {{ formatCurrency(dtl.total_estimasi_price) }}
+                        </td>
+
+                        <td class="border px-2 py-2 text-center w-[150px]">
+                          {{ dtl.total_jumlah }}
+                        </td>
+
+                        <td class="border px-2 py-2 text-right" colspan="2">
+                          {{ formatCurrency(dtl.total_estimasi_price * dtl.total_jumlah) }}
+                        </td>
+                      </tr>
+
+                      <!-- ================================= -->
+                      <!-- 🔥 TOTAL PER PEKERJAAN -->
+                      <!-- ================================= -->
+                      <tr class="bg-green-100 font-bold">
+                        <td colspan="5" class="border px-2 py-2 text-right">
+                          Total Pekerjaan
+                        </td>
+                        <td class="border px-2 py-2 text-right">
+                          {{ formatCurrency(
+                            value.detail
+                              .filter(d => d.pekerjaan_id == value.pekerjaan_id && d.rab == 'Final')
+                              .reduce((sum, d) => sum + (d.total_estimasi_price * d.total_jumlah), 0)
+                          ) }}
+                        </td>
+                      </tr>
+
+                    </tbody>
+                  </table>
+
+                  <!-- =================================== -->
+                  <!-- 🔥 TOTAL PER PRODUCT -->
+                  <!-- =================================== -->
+                  <div class="text-right font-bold text-lg mt-2 mb-6 bg-blue-50 border p-3 rounded">
+                    Total Product:
+                    {{ formatCurrency(
+                      projectPekerjaan
+                        .filter(p => p.product_id == product.product_id)
+                        .flatMap(p => p.detail.filter(d => d.rab == 'Final'))
+                        .reduce((sum, d) => sum + (d.total_estimasi_price * d.total_jumlah), 0)
+                    ) }}
+                  </div>
 
 
 
@@ -1442,10 +1749,34 @@ const downloadRABExcel = (data, product, project) => {
         Batal
       </button>
       <button
-        type="submit" :disabled="form.processing"
-        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        type="submit"
+        :disabled="formProduct.processing"
+        class="px-4 py-2 flex items-center justify-center gap-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        Simpan
+        <span v-if="!formProduct.processing">Simpan</span>
+        <span v-else class="flex items-center">
+          <svg
+            class="animate-spin h-5 w-5 text-white mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            ></path>
+          </svg>
+          Proses...
+        </span>
       </button>
     </div>
     </form>
@@ -1461,7 +1792,7 @@ const downloadRABExcel = (data, product, project) => {
     <h2 class="text-lg font-semibold">Tambah Product</h2>
     <form class="w-12/12 space-y-4" @submit.prevent="handleSubmitProduct">
       <input type="hidden" v-model="formProduct.project_id" />
-    <div>
+    <!-- <div>
       <label class="block mb-1">Pilih Product:</label>
       <select v-model="formProduct.product_id" class="w-full border p-2 rounded">
         <option disabled value="">-- Pilih Product --</option>
@@ -1469,7 +1800,24 @@ const downloadRABExcel = (data, product, project) => {
           {{ job.name }}
         </option>
       </select>
-    </div>
+    </div> -->
+    <div>
+          <label class="block mb-1">Pilih Product:</label>
+          <input
+            list="productList"
+            v-model="productNameInput"
+            placeholder="Ketik nama produk..."
+            class="w-full border p-2 rounded"
+            @change="updateProductId"
+          />
+          <datalist id="productList">
+            <option
+              v-for="job in product"
+              :key="job.id"
+              :value="job.name"
+            ></option>
+          </datalist>
+        </div>
 
     <div>
         <label class="block mb-1">Jumlah:</label>
@@ -1483,11 +1831,7 @@ const downloadRABExcel = (data, product, project) => {
 
     </div>
 
-    <div>
-        <label class="block mb-1">Keterangan:<span class="text-red-500">Wajib Isi</span></label>
-        <input type="text" v-model="formProduct.keterangan" required class="w-full border p-2 rounded" />
 
-    </div>
 
     <div class="flex justify-end space-x-2 mt-4">
       <button

@@ -232,6 +232,7 @@ class RABExportController extends Controller
 public function export2(Request $request)
 {
     $projectId = $request->query('project');
+    $rab = $request->query('type');
 
     // === Ambil Data ===
     $query = DB::select("
@@ -274,6 +275,7 @@ public function export2(Request $request)
                     LEFT JOIN supplier xc ON xc.id = d.supplier_id
                     WHERE d.project_id = a.project_id
                         AND d.product_id = a.product_id
+                        AND d.rab = '".$rab."'
                     GROUP BY d.product_id, x.pekerjaan_id, d.tambahan, d.material_id, d.id
 
                     UNION ALL
@@ -294,6 +296,7 @@ public function export2(Request $request)
                     LEFT JOIN supplier xc ON xc.id = d.supplier_id
                     WHERE d.project_id = a.project_id
                         AND d.product_id = a.product_id
+                        AND d.rab = '".$rab."'
                     GROUP BY d.product_id, d.pekerjaan_id, d.tambahan, d.id
                 ) t
                 WHERE t.pekerjaan_id = a.pekerjaan_id
@@ -306,10 +309,61 @@ public function export2(Request $request)
 
     $projectPekerjaan = json_decode(json_encode($query), true);
 
-    $projectProduct = \App\Models\ProjectProduct::join('products', 'project_product.product_id', '=', 'products.id')
-        ->where('project_product.project_id', $projectId)
-        ->select('project_product.*', 'products.name as product_name')
-        ->get();
+    // $projectProduct = \App\Models\ProjectProduct::join('products', 'project_product.product_id', '=', 'products.id')
+    //     ->where('project_product.project_id', $projectId)
+    //     ->select('project_product.*', 'products.name as product_name')
+    //     ->get();
+
+
+    $projectProduct = collect(DB::select("
+        SELECT 
+            pp.*, 
+            p.name AS product_name,
+
+            (
+                COALESCE(
+                    (SELECT SUM(d.estimasi_price * d.jumlah)
+                     FROM project_detail d
+                     WHERE d.project_id = pp.project_id
+                       AND d.rab = '{$rab}'
+                       AND d.product_id = pp.product_id), 0
+                )
+                +
+                COALESCE(
+                    (SELECT SUM(dt.estimasi_price * dt.jumlah)
+                     FROM project_detail_tambahan dt
+                     WHERE dt.project_id = pp.project_id
+                       AND dt.rab = '{$rab}'
+                       AND dt.product_id = pp.product_id), 0
+                )
+            ) AS total,
+
+            (
+                pp.jumlah * (
+                    COALESCE(
+                        (SELECT SUM(d.estimasi_price * d.jumlah)
+                         FROM project_detail d
+                         WHERE d.project_id = pp.project_id
+                           AND d.rab = '{$rab}'
+                           AND d.product_id = pp.product_id), 0
+                    )
+                    +
+                    COALESCE(
+                        (SELECT SUM(dt.estimasi_price * dt.jumlah)
+                         FROM project_detail_tambahan dt
+                         WHERE dt.project_id = pp.project_id
+                           AND dt.rab = '{$rab}'
+                           AND dt.product_id = pp.product_id), 0
+                    )
+                )
+            ) AS grandtotal
+
+        FROM project_product pp
+        JOIN products p ON pp.product_id = p.id
+
+        WHERE pp.project_id = ?
+    ", [$projectId]));
+
 
     $projectGambar = ProjectGambar::where('project_id', $projectId)->get();
 

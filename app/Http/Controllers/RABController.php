@@ -18,6 +18,7 @@ class RABController extends Controller
         $projectPekerjaan = json_decode(urldecode($request->query('projectPekerjaan')), true);
         $projectProduct   = json_decode(urldecode($request->query('product')), true);
         $projectId        = $request->query('project');
+        $rab = $request->query('type');
 
 
         $project = Project::where('id', $projectId)->first();
@@ -49,6 +50,7 @@ class RABController extends Controller
         // $projectId        = $request->query('project');
 
         $projectId        = $request->query('project');
+        $rab        = $request->query('type');
 
         $query = DB::select("
             SELECT DISTINCT 
@@ -90,6 +92,7 @@ class RABController extends Controller
                                     LEFT JOIN supplier xc on xc.id = d.supplier_id
                         WHERE d.project_id = a.project_id
                                     and d.product_id=a.product_id
+                                    AND d.rab = '".$rab."'
                         GROUP BY d.product_id, x.pekerjaan_id, d.tambahan, d.material_id, d.id
 
                         UNION ALL
@@ -110,6 +113,7 @@ class RABController extends Controller
                                     LEFT JOIN supplier xc on xc.id = d.supplier_id
                         WHERE d.project_id = a.project_id
                                     and d.product_id=a.product_id
+                                    AND d.rab = '".$rab."'
                         GROUP BY d.product_id, d.pekerjaan_id, d.tambahan, d.id
                     ) t
                     WHERE t.pekerjaan_id = a.pekerjaan_id
@@ -125,10 +129,60 @@ class RABController extends Controller
         $projectPekerjaan = $query;
         // $projectProduct   = ProjectProduct::where('project_id', $projectId)->get();
 
-        $projectProduct = ProjectProduct::join('products', 'project_product.product_id', '=', 'products.id')
-            ->where('project_product.project_id', $projectId)
-            ->select('project_product.*', 'products.name as product_name')
-            ->get();
+        // $projectProduct = ProjectProduct::join('products', 'project_product.product_id', '=', 'products.id')
+        //     ->where('project_product.project_id', $projectId)
+        //     ->select('project_product.*', 'products.name as product_name')
+        //     ->get();
+
+        $projectProduct = DB::select("
+        SELECT 
+            pp.*, 
+            p.name AS product_name,
+
+            (
+                COALESCE(
+                    (SELECT SUM(d.estimasi_price * d.jumlah)
+                     FROM project_detail d
+                     WHERE d.project_id = pp.project_id
+                       AND d.rab = '{$rab}'
+                       AND d.product_id = pp.product_id), 0
+                )
+                +
+                COALESCE(
+                    (SELECT SUM(dt.estimasi_price * dt.jumlah)
+                     FROM project_detail_tambahan dt
+                     WHERE dt.project_id = pp.project_id
+                       AND dt.rab = '{$rab}'
+                       AND dt.product_id = pp.product_id), 0
+                )
+            ) AS total,
+
+            (
+                pp.jumlah * (
+                    COALESCE(
+                        (SELECT SUM(d.estimasi_price * d.jumlah)
+                         FROM project_detail d
+                         WHERE d.project_id = pp.project_id
+                           AND d.rab = '{$rab}'
+                           AND d.product_id = pp.product_id), 0
+                    )
+                    +
+                    COALESCE(
+                        (SELECT SUM(dt.estimasi_price * dt.jumlah)
+                         FROM project_detail_tambahan dt
+                         WHERE dt.project_id = pp.project_id
+                           AND dt.rab = '{$rab}'
+                           AND dt.product_id = pp.product_id), 0
+                    )
+                )
+            ) AS grandtotal
+
+        FROM project_product pp
+        JOIN products p ON pp.product_id = p.id
+
+        WHERE pp.project_id = ?
+    ", [$projectId]);
+
         
 
         $project = Project::where('id', $projectId)->first();

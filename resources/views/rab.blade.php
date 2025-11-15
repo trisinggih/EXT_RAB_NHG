@@ -75,9 +75,9 @@
                     <th style="width:5%;">No</th>
                     <th style="width:35%;">Uraian Pekerjaan</th>
                     <th style="width:10%;">Satuan</th>
-                    <th style="width:10%;" class="text-right">Kuantitas</th>
                     <th style="width:15%;" class="text-right">Harga Satuan</th>
                     <th style="width:15%;" class="text-right">Jumlah</th>
+                    <th style="width:15%;" class="text-right">Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -96,7 +96,7 @@
 
                         @php
                             $grandTotalProduct = 0;
-                            $pekerjaanList = collect($projectPekerjaan)->where('product_id', $product['product_id'])->values();
+                            $pekerjaanList = collect($projectPekerjaan)->where('product_id', $product->product_id)->values();
                         @endphp
 
                         @forelse ($pekerjaanList as $pekerjaan)
@@ -108,22 +108,24 @@
                             @endphp
 
                             {{-- Detail BOM / item pekerjaan --}}
-                            @forelse ($details as $index => $d)
+                            @forelse (($details ?? []) as $index => $d)
                                 @php
-                                    $qty = floatval($d['total_jumlah'] ?? 0);
-                                    $harga = floatval($d['total_estimasi_price'] ?? 0);
+                                    $qty   = floatval($d->total_jumlah ?? 0);
+                                    $harga = floatval($d->total_estimasi_price ?? 0);
                                     $total = $qty * $harga;
+
                                     $subtotal += $total;
                                 @endphp
-
                             @empty
-
+                            
                             @endforelse
+
+
 
                             {{-- Subtotal per pekerjaan --}}
          
                             @php
-                                $grandTotalProduct += $subtotal;
+                                $grandTotalProduct += 0;
                             @endphp
                         @empty
               
@@ -132,15 +134,16 @@
                         {{-- Grand total per produk --}}
                         <tr style="font-weight: bold; background-color: #e6f7ff;">
                             <td>{{ ++$nomor }}</td>
-                            <td  class="text-left">{{ $product['product_name'] }}</td>
-                            <td  class="text-left">{{ $product['satuan'] }}</td>
-                            <td  class="text-left">{{ $product['jumlah'] }}</td>
-                            <td  class="text-left">{{ number_format($grandTotalProduct, 0, ',', '.') }}</td>
-                            <td class="text-right">{{ number_format(($grandTotalProduct*$product['jumlah']), 0, ',', '.') }}</td>
+                            <td  class="text-left">{{ $product->product_name }}</td>
+                            <td  class="text-left">{{ $product->satuan }}</td>
+                            
+                            <td  class="text-left">{{ number_format(($product->total), 0, ',', '.') }}</td>
+                            <td  class="text-left">{{ $product->jumlah }}</td>
+                            <td class="text-right">{{ number_format(($product->grandtotal), 0, ',', '.') }}</td>
                         </tr>
 
                         @php
-                            $grandTotalAll += ($grandTotalProduct*$product['jumlah']);
+                            $grandTotalAll += ($product->grandtotal);
                         @endphp
        
             @endforeach
@@ -167,48 +170,12 @@
 @endphp
 
 <table width="100%" cellspacing="0" cellpadding="6" style="border-collapse: collapse; margin-top: 30px; font-size: 13px;">
+
+  
     <tr style="background-color: #f8f9fa; font-weight: bold;">
-        <td style="text-align:left;">TOTAL AWAL</td>
+        <td>TOTAL AKHIR</td>
         <td style="text-align:right; color: green;">
             Rp {{ number_format($grandTotalAll, 0, ',', '.') }}
-        </td>
-    </tr>
-    <tr>
-        <td>a. Profit 20%</td>
-        <td style="text-align:right;">Rp {{ number_format($profit, 0, ',', '.') }}</td>
-    </tr>
-    <tr>
-        <td>b. Fee Kantor 20%</td>
-        <td style="text-align:right;">Rp {{ number_format($feeKantor, 0, ',', '.') }}</td>
-    </tr>
-    <tr>
-        <td>c. Fee Staf 2%</td>
-        <td style="text-align:right;">Rp {{ number_format($feeStaf, 0, ',', '.') }}</td>
-    </tr>
-    <tr>
-        <td>d. Fee Konsultan 3%</td>
-        <td style="text-align:right;">Rp {{ number_format($feeKonsultan, 0, ',', '.') }}</td>
-    </tr>
-    <tr>
-        <td>e. Fee Bendera 3%</td>
-        <td style="text-align:right;">Rp {{ number_format($feeBendera, 0, ',', '.') }}</td>
-    </tr>
-    <tr>
-        <td>f. Fee Marketing 2%</td>
-        <td style="text-align:right;">Rp {{ number_format($feeMarketing, 0, ',', '.') }}</td>
-    </tr>
-    <tr>
-        <td>g. PPh 2.65%</td>
-        <td style="text-align:right;">Rp {{ number_format($pph, 0, ',', '.') }}</td>
-    </tr>
-    <tr>
-        <td>h. PPN 11%</td>
-        <td style="text-align:right;">Rp {{ number_format($ppn, 0, ',', '.') }}</td>
-    </tr>
-    <tr style="background-color: #f8f9fa; font-weight: bold;">
-        <td>TOTAL AKHIR (Grand Total)</td>
-        <td style="text-align:right; color: green;">
-            Rp {{ number_format($grandTotalFinal, 0, ',', '.') }}
         </td>
     </tr>
 </table>
@@ -253,12 +220,12 @@
             @foreach ($projectProduct as $product)
 
             <tr style="font-weight: bold; background-color: #fafafa;">
-                <td colspan="6">{{ $product['product_name'] ?? 'Tanpa Nama Produk' }}</td>
+                <td colspan="6">{{ $product->product_name ?? 'Tanpa Nama Produk' }}</td>
             </tr>
 
                         @php
                             $grandTotalProduct = 0;
-                            $pekerjaanList = collect($projectPekerjaan)->where('product_id', $product['product_id'])->values();
+                            $pekerjaanList = collect($projectPekerjaan)->where('product_id', $product->product_id)->values();
                         @endphp
 
                         @forelse ($pekerjaanList as $pekerjaan)
@@ -276,7 +243,7 @@
                             </tr>
 
                             {{-- Detail BOM / item pekerjaan --}}
-                            @forelse ($details as $index => $d)
+                            @forelse (($details ?? [])  as $index => $d)
                                 @php
                                     $qty = floatval($d['total_jumlah'] ?? 0);
                                     $harga = floatval($d['total_estimasi_price'] ?? 0);
@@ -292,9 +259,7 @@
                                     <td class="text-right">{{ number_format($total, 0, ',', '.') }}</td>
                                 </tr>
                             @empty
-                                <tr>
-                                    <td colspan="6" class="text-center">Tidak ada detail</td>
-                                </tr>
+                            
                             @endforelse
 
                             {{-- Subtotal per pekerjaan --}}
@@ -314,7 +279,7 @@
 
                         {{-- Grand total per produk --}}
                         <tr style="font-weight: bold; background-color: #e6f7ff;">
-                            <td colspan="5" class="text-right">Grand Total {{ $product['product_name'] }}</td>
+                            <td colspan="5" class="text-right">Grand Total {{ $product->product_name }}</td>
                             <td class="text-right">{{ number_format($grandTotalProduct, 0, ',', '.') }}</td>
                         </tr>
 

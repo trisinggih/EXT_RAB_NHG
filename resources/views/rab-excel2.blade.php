@@ -17,7 +17,7 @@
         @foreach ($projectProduct as $product)
             @php
                 $grandTotalProduct = 0;
-                $pekerjaanList = collect($projectPekerjaan)->where('product_id', $product['product_id'])->values();
+                $pekerjaanList = collect($projectPekerjaan)->where('product_id', $product->product_id)->values();
             @endphp
 
             @forelse ($pekerjaanList as $pekerjaan)
@@ -28,7 +28,7 @@
                     $subtotal = 0;
                 @endphp
 
-                @forelse ($details as $index => $d)
+                @forelse (($details ?? []) as $index => $d)
                     @php
                         $qty = floatval($d['total_jumlah'] ?? 0);
                         $harga = floatval($d['total_estimasi_price'] ?? 0);
@@ -47,7 +47,7 @@
             {{-- Grand total per produk --}}
 
             @php
-                $grandTotalAll += ($grandTotalProduct*$product['jumlah']);
+                $grandTotalAll += ($grandTotalProduct*$product->jumlah);
             @endphp
         @endforeach
 
@@ -88,12 +88,12 @@
             @foreach ($projectProduct as $product)
 
             <tr style="font-weight: bold; background-color: #fafafa;">
-                <td colspan="6">{{ $product['product_name'] ?? 'Tanpa Nama Produk' }}</td>
+                <td colspan="6">{{ $product->product_name ?? 'Tanpa Nama Produk' }}</td>
             </tr>
 
                         @php
                             $grandTotalProduct = 0;
-                            $pekerjaanList = collect($projectPekerjaan)->where('product_id', $product['product_id'])->values();
+                            $pekerjaanList = collect($projectPekerjaan)->where('product_id', $product->product_id)->values();
                         @endphp
 
                         @forelse ($pekerjaanList as $pekerjaan)
@@ -111,7 +111,7 @@
                             </tr>
 
                             {{-- Detail BOM / item pekerjaan --}}
-                            @forelse ($details as $index => $d)
+                            @forelse (($details ?? []) as $index => $d)
                                 @php
                                     $qty = floatval($d['total_jumlah'] ?? 0);
                                     $harga = floatval($d['total_estimasi_price'] ?? 0);
@@ -149,7 +149,7 @@
 
                         {{-- Grand total per produk --}}
                         <tr style="font-weight: bold; background-color: #e6f7ff;">
-                            <td colspan="5" class="text-right">Grand Total {{ $product['product_name'] }}</td>
+                            <td colspan="5" class="text-right">Grand Total {{ $product->product_name }}</td>
                             <td class="text-right">Rp {{ number_format($grandTotalProduct, 0, ',', '.') }}</td>
                         </tr>
 

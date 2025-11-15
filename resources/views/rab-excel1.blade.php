@@ -29,7 +29,7 @@
         @foreach ($projectProduct as $product)
             @php
                 $grandTotalProduct = 0;
-                $pekerjaanList = collect($projectPekerjaan)->where('product_id', $product['product_id'])->values();
+                $pekerjaanList = collect($projectPekerjaan)->where('product_id', $product->product_id)->values();
             @endphp
 
             @forelse ($pekerjaanList as $pekerjaan)
@@ -40,7 +40,7 @@
                     $subtotal = 0;
                 @endphp
 
-                @forelse ($details as $index => $d)
+                @forelse (($details ?? []) as $index => $d)
                     @php
                         $qty = floatval($d['total_jumlah'] ?? 0);
                         $harga = floatval($d['total_estimasi_price'] ?? 0);
@@ -59,15 +59,15 @@
             {{-- Grand total per produk --}}
             <tr style="font-weight: bold; background-color: #e6f7ff;">
                 <td style="border: 1px solid #ddd; padding: 5px;">{{ ++$nomor }}</td>
-                <td style="border: 1px solid #ddd; padding: 5px;">{{ $product['product_name'] }}</td>
-                <td style="border: 1px solid #ddd; padding: 5px;">{{ $product['satuan'] }}</td>
-                <td style="border: 1px solid #ddd; padding: 5px; text-align: right;">Rp {{ $product['jumlah'] }}</td>
+                <td style="border: 1px solid #ddd; padding: 5px;">{{ $product->product_name }}</td>
+                <td style="border: 1px solid #ddd; padding: 5px;">{{ $product->satuan }}</td>
+                <td style="border: 1px solid #ddd; padding: 5px; text-align: right;">Rp {{ $product->jumlah }}</td>
                 <td style="border: 1px solid #ddd; padding: 5px; text-align: right;">Rp {{ number_format($grandTotalProduct, 0, ',', '.') }}</td>
-                <td style="border: 1px solid #ddd; padding: 5px; text-align: right;">Rp {{ number_format(($grandTotalProduct*$product['jumlah']), 0, ',', '.') }}</td>
+                <td style="border: 1px solid #ddd; padding: 5px; text-align: right;">Rp {{ number_format(($grandTotalProduct*$product->jumlah), 0, ',', '.') }}</td>
             </tr>
 
             @php
-                $grandTotalAll += ($grandTotalProduct*$product['jumlah']);
+                $grandTotalAll += ($grandTotalProduct*$product->jumlah);
             @endphp
         @endforeach
 
@@ -86,29 +86,8 @@
 @endphp
 
         <tr style="background-color: #f8f9fa; font-weight: bold;">
-            <td style="text-align:left;" colspan="6"></td>
-        </tr>
-        <tr style="background-color: #f8f9fa; font-weight: bold;">
-            <td style="text-align:left;" colspan="5">TOTAL AWAL</td>
+            <td colspan="5">TOTAL AKHIR </td>
             <td style="text-align:right; color: green;">Rp {{ number_format($grandTotalAll, 0, ',', '.') }}</td>
-        </tr>
-        <tr style="background-color: #f8f9fa; font-weight: bold;">
-            <td style="text-align:left;" colspan="6"></td>
-        </tr>
-        <tr style="background-color: #f8f9fa; font-weight: bold;">
-            <td style="text-align:left;" colspan="6"></td>
-        </tr>
-        <tr><td colspan="5">a. Profit 20%</td><td style="text-align:right;">Rp {{ number_format($profit, 0, ',', '.') }}</td></tr>
-        <tr><td colspan="5">b. Fee Kantor 20%</td><td style="text-align:right;">Rp {{ number_format($feeKantor, 0, ',', '.') }}</td></tr>
-        <tr><td colspan="5">c. Fee Staf 2%</td><td style="text-align:right;">Rp {{ number_format($feeStaf, 0, ',', '.') }}</td></tr>
-        <tr><td colspan="5">d. Fee Konsultan 3%</td><td style="text-align:right;">Rp {{ number_format($feeKonsultan, 0, ',', '.') }}</td></tr>
-        <tr><td colspan="5">e. Fee Bendera 3%</td><td style="text-align:right;">Rp {{ number_format($feeBendera, 0, ',', '.') }}</td></tr>
-        <tr><td colspan="5">f. Fee Marketing 2%</td><td style="text-align:right;">Rp {{ number_format($feeMarketing, 0, ',', '.') }}</td></tr>
-        <tr><td colspan="5">g. PPh 2.65%</td><td style="text-align:right;">Rp {{ number_format($pph, 0, ',', '.') }}</td></tr>
-        <tr><td colspan="5">h. PPN 11%</td><td style="text-align:right;">Rp {{ number_format($ppn, 0, ',', '.') }}</td></tr>
-        <tr style="background-color: #f8f9fa; font-weight: bold;">
-            <td colspan="5">TOTAL AKHIR (Grand Total)</td>
-            <td style="text-align:right; color: green;">Rp {{ number_format($grandTotalFinal, 0, ',', '.') }}</td>
         </tr>
     </tbody>
 </table>
