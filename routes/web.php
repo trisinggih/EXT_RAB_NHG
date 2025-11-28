@@ -26,8 +26,8 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TestEmail;
 
-Route::get('/', [FrontHomeController::class, 'Index'])->name('home');
-Route::get('/blog', [FrontHomeController::class, 'Blog'])->name('blog');
+// Route::get('/', [FrontHomeController::class, 'Index'])->name('home');
+// Route::get('/blog', [FrontHomeController::class, 'Blog'])->name('blog');
 
 Route::get('/allprojects', [FrontHomeController::class, 'Project'])->name('allproject');
 
